@@ -1,0 +1,167 @@
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    background-color: white;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0px 4px 2px -2px gray;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+.navbar-toggler {
+    border: none;
+}
+
+.navbar-collapse {
+    justify-content: space-between;
+}
+
+.nav-link {
+    color: #333;
+}
+
+
+#search-results {
+    position: absolute; 
+    top: 100%; 
+    left: 0; 
+    width: 100%; 
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ccc; 
+    display: none; 
+}
+.suggestion {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.btn-search:hover{
+    color: black;
+}
+
+.suggestion:hover {
+    background-color: #f4f4f4;
+}
+
+.search-bar {
+top: 50%;
+transform: translateY(-50%);
+pointer-events: none;
+}
+
+.search-bar form {
+    max-width: 300px;
+    width: 100%;
+    pointer-events: auto;
+}
+
+.dropdown-content {
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    min-width: 160px;
+}
+
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 50px;
+}
+
+
+.user-info h6 {
+    color: white; 
+    margin: 0px!important ;
+}
+
+
+.avatar-img{
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+    border-radius: 50%; 
+    border: 2px solid #ccc;
+    padding: 3px;
+}
+
+
+.avatar-img:hover {
+    transform: scale(1.1);
+}
+
+
+.menu {
+    position: absolute;
+    top: 100%;
+    left: 90%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    z-index: 2000;
+    width: 150px;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu li, .menu button {
+    padding: 0;
+    margin: 0;
+}
+
+.menu li a, .menu li button {
+    text-decoration: none;
+    color: black;
+    display: block;
+    border: none;
+    background: none;
+    cursor: pointer; 
+    padding: 10px 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.menu li button{
+    text-align: left
+}
+.menu li a:hover, .menu li button:hover {
+    background-color: gray;
+    color: aliceblue;
+}
+
+.logo-img {
+    max-width: 120px;
+    height: auto;
+  }
+
+.btn-black-white {
+    background-color: black; 
+    border: 2px solid white;  
+    color: white;    
+}
+
+.btn-black-white:hover {
+    color: white;    
+}
+
+.chat-icon{
+    background-color: white;
+    color: black;
+    padding: 3px 10px;
+    font-size: 20px;
+    text-align: center;
+}

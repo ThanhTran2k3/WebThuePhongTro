@@ -1,0 +1,75 @@
+.show_icon{
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.image-upload-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.file-input {
+    display: none; /* Ẩn input file */
+}
+
+.upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    transition: border-color 0.3s;
+}
+
+.upload-label:hover {
+    border-color: #999;
+}
+
+#imagePreview {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%; /* Biến hình ảnh thành hình tròn */
+    margin-bottom: 10px;
+}
+
+.upload-text {
+    font-size: 16px;
+    color: #666;
+}
+
+
+.login-submit{
+    background-color: #2b3990;
+    color:white; 
+    border:none; 
+    width:100%
+}
+
+.logo{
+    display: block;
+    margin: 20px auto;
+    width: 100px;
+    height: 100px;
+}
+
+.w-40{
+    width: 40%;
+    height: 50%;
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+    color: #444;
+}
+
+    a:hover {
+        color: #444;
+    }

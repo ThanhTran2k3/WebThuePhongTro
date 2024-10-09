@@ -1,0 +1,27 @@
+
+.footer-content {
+    padding-top:20px;
+    height:100%;
+    display:flex;
+    width:50%;
+    padding-left:10%!important
+}
+
+
+.footer-content  p{
+    height:30px;
+    margin-bottom:0px!important
+}
+
+.footer-content  a{
+    font-size: 30px;
+    padding-right:10px
+}
+
+.footer-content a:hover {
+    opacity: 0.8;
+}
+
+.info-color{
+    color: #007bff;
+}

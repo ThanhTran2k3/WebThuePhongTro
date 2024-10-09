@@ -1,0 +1,43 @@
+.image-payment{
+    width: 50px;
+}
+
+
+/* Định dạng danh sách hóa đơn */
+.invoice-list {
+    margin-top: 20px;
+}
+
+/* Định dạng từng hóa đơn */
+.invoice-item {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-item h5 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.invoice-item p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+
+.no-invoices {
+    text-align: center;
+    padding: 20px;
+}
+
+.no-invoices p {
+    font-size: 18px;
+    color: #666;
+}
+
+.text-green {
+    color: green;
+}
