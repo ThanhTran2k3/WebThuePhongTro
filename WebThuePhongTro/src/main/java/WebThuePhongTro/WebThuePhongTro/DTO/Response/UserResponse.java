@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -25,5 +26,6 @@ public class UserResponse {
     private String wards;
     private String address;
     private BigDecimal balance;
-    private LocalDate joinDate;
+    private LocalDateTime joinDate;
+    private boolean status;
 }

@@ -12,8 +12,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageResponse {
+public class PageResponse <T> {
 
     private int totalPage;
-    private List<PostResponse> listPost;
+    private int currentPage;
+    private T content;
 }

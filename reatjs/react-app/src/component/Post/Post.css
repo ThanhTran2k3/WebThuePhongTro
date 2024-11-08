@@ -145,6 +145,26 @@ a {
     height: 200px
 }
 
+.img-small{
+  height: 130px;
+  margin-bottom: 7px;
+}
+.img-servie{
+  height:70px;
+  width: 100%;
+  display: flex;
+}
+
+.img-servie img{
+  height: 100%; 
+  width: 30%;
+  margin-right: 5px;
+}
+
+.img-servie img:last-child{
+  margin-right: 0;
+}
+
 .head-card {
     display: flex;
     justify-content: space-between; 
@@ -519,4 +539,3 @@ input[type="radio"]:checked + .radio-label {
 input[type="radio"]:checked + .radio-label i {
   color: #007bff;
 }
-

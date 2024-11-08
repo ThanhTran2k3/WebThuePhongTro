@@ -54,11 +54,11 @@ const DetailsPost = () => {
 
 
     return (
-        Object.keys(post).length > 0 ? (
+        Object.keys(post).length > 0 && (
             <div>
                 <div className="d-flex">
                 <div className="detail-post ">
-                    <div className="gap-3 info-post bg-white">
+                    <div className="gap-3 info-post bg-white border">
                         <div className="table-responsive text-nowrap">
                             {post.postImages.map(image =>(
                                 <img  key={image.postImageId} src={`http://localhost:8080${image.urlImage}`} className="post-image" alt="Hình ảnh bài đăng"/>
@@ -117,8 +117,8 @@ const DetailsPost = () => {
                             
                     </div>
 
-                    <div className="features-post bg-white">
-                        <h5 className="my-2">Đặc điểm</h5>
+                    <div className="features-post bg-white border">
+                        <h5 className="my-2 text-center">Đặc điểm</h5>
 
                         <div className="d-flex">
                             <div className="feature-item">
@@ -144,13 +144,13 @@ const DetailsPost = () => {
                         </div>
                     </div>
 
-                    <div className="description-post gap-3 bg-white">
-                        <h5 className="my-2">Mô tả</h5>
+                    <div className="description-post gap-3 bg-white border">
+                        <h5 className="my-2 text-center">Mô tả</h5>
                         <pre className="baseFont baseColor pre-wrap">{post.description}</pre>
                     </div>
 
                     {Array.isArray(listPost) && listPost.length > 0 && (
-                        <div className="suggestions bg-white">
+                        <div className="suggestions bg-white border">
                             <h5 className="my-2 text-center">Gợi ý</h5>
                             <div className="table-responsive suggestion-items">
                                 {listPost.map(item => (
@@ -172,7 +172,7 @@ const DetailsPost = () => {
                 </div>
 
 
-                <div className="info-user">
+                <div className="info-user border">
                     <div className="details-user">
                         <img src={`http://localhost:8080${user.avatar}`} alt="" className="avatar" />
                         <h4 className="p-5px text-center">{user.userName}</h4>
@@ -197,9 +197,7 @@ const DetailsPost = () => {
 
                 
             </div>
-        ): (
-            <p>No user data available.</p>
-        )  
+        ) 
     )
 
 };

@@ -1,6 +1,7 @@
 package WebThuePhongTro.WebThuePhongTro.Service;
 
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.PostRequest;
+import WebThuePhongTro.WebThuePhongTro.DTO.Response.PageResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PostResponse;
 import WebThuePhongTro.WebThuePhongTro.Exception.AppException;
 import WebThuePhongTro.WebThuePhongTro.Exception.ErrorCode;
@@ -11,9 +12,7 @@ import WebThuePhongTro.WebThuePhongTro.Repository.PostRepository;
 import WebThuePhongTro.WebThuePhongTro.Repository.UserPostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,14 +55,37 @@ public class PostService {
 
     private final PostCategoryService postCategoryService;
 
-    public Page<Post> getAllPost(int page){
-        Pageable pageable = PageRequest.of(page-1, 3);
-        return postRepository.findAll(pageable);
+    public Page<PostResponse> getAllPost(int page){
+        Pageable pageable = PageRequest.of(page-1, 8,Sort.by(Sort.Direction.DESC, "postingDate"));
+
+        return postRepository.
+                findByStatusAndApprovalStatusAndExpirationDateAfter(true,true,LocalDateTime.now(),pageable)
+                .map(item -> convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()));
+    }
+
+    public Page<PostResponse> getPostManager(int page,String postType){
+        Pageable pageable = PageRequest.of(page-1, 8,Sort.by(Sort.Direction.DESC, "postingDate"));
+
+        return switch (postType) {
+            case "postDisplays" ->
+                    postRepository.
+                            findByStatusAndApprovalStatusAndExpirationDateAfter(true,true,LocalDateTime.now(),pageable)
+                            .map(item -> convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()));
+            case "postPending" ->
+                    postRepository.
+                            findByApprovalStatusNullableAndExpirationDateAfter(LocalDateTime.now(),pageable)
+                            .map(item -> convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()));
+            default -> postRepository.findByApprovalStatusAndExpirationDateAfter(false,LocalDateTime.now(),pageable)
+                    .map(item -> convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()));
+        };
     }
 
     public List<Post> getAllPost(){
 
-        return postRepository.findAll();
+        return postRepository.findAll().stream()
+                .filter(s->s.isStatus()&& s.getApprovalStatus()
+                        &&s.getExpirationDate().isAfter(LocalDateTime.now()))
+                .toList();
     }
 
     public void addPost(User user, PostRequest postRequest) throws IOException {
@@ -135,11 +160,20 @@ public class PostService {
         updatePost(post);
     }
 
-    public void deletePostById(int id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalStateException("Post does not exist."));
-        post.setStatus(false);
+    public void deletePostById(int id,String action) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXIST));
+        if(action.equals("delete")){
+            post.setStatus(false);
+            post.setApprovalStatus(false);
+        }
+        else {
+            post.setStatus(true);
+            post.setApprovalStatus(true);
+        }
+
         postRepository.save(post);
     }
+
 
     public String saveImage(MultipartFile image) throws IOException {
         File staticImagesFolder = new File("target/classes/static/images");
@@ -162,7 +196,7 @@ public class PostService {
 
     }
 
-    public static PostResponse convertToDTO(Post post) {
+    public static PostResponse convertToDTO(Post post, String userName) {
         return PostResponse.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
@@ -180,6 +214,7 @@ public class PostService {
                 .postCategory(post.getPostCategory())
                 .status(post.isStatus())
                 .approvalStatus(post.getApprovalStatus())
+                .userName(userName)
                 .build();
     }
 
@@ -257,6 +292,30 @@ public class PostService {
         invoiceService.addInvoice(invoice);
         userService.updateUser(user);
         updatePost(post);
+    }
+
+
+    public String removeAccent(String s) {
+        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(temp).replaceAll("");
+    }
+
+    public List<String> suggestions(String s){
+        String query = removeAccent(s);
+
+        return getAllPost().stream()
+                .map(Post::getTitle)
+                .filter(title -> removeAccent(title).toLowerCase().contains(query.toLowerCase()))
+                .toList();
+    }
+
+    public Page<PostResponse> searchResult(String s, int page){
+        String query = removeAccent(s);
+        Pageable pageable = PageRequest.of(page-1, 8,Sort.by(Sort.Direction.DESC, "posting_date"));
+        return postRepository.searchPosts(query,LocalDateTime.now(),pageable)
+                .map(item -> convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()));
+
     }
 
 }

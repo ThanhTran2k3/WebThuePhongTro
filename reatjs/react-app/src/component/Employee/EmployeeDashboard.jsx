@@ -1,24 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import './User.css'
-import { useLocation, useNavigate } from 'react-router-dom';
-import { getUserByUserName } from '../../api/userApi';
-import EditUser from './EditUser';
-import CreatePost from '../Post/CreatePost';
-import { useUser } from '../../UserContext';
-import UserInfo from './UserInfo';
-import ManagerPost from '../Post/ManagerPost';
-import EditPost from '../Post/EditPost';
-import Payment from '../Payment/Payment';
-import ExtendPost from '../Post/ExtendPost';
-import PostService from '../Post/PostService';
-import HistoryPayment from '../Payment/HistoryPayment';
-import ChangePass from './ChangePass';
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../../UserContext";
+import { getUserByUserName } from "../../api/userApi";
+import ChangePass from "../User/ChangePass";
+import EditUser from "../User/EditUser";
+import ManagePayment from "./ManagePayment";
+import UserManager from "./UserManager";
+import ApprovePost from "./ApprovePost";
 
-const UserDashboard = () => {
-    const [currentContent, setCurrentContent] = useState(null);
+
+
+
+const EmployeeDashboard = () => {
+    const [currentContent, setCurrentContent] = useState(<UserManager />);
     const navigate = useNavigate();
     const [user,setUser] = useState({})
-    const [activeButton, setActiveButton] = useState(null);
+    const [activeButton, setActiveButton] = useState('userManage');
     const { userInfo } = useUser();
     const location = useLocation(); 
 
@@ -46,29 +43,18 @@ const UserDashboard = () => {
 
     useEffect(() => {
 
-        if (location.pathname === '/user/manager') {
-            setCurrentContent(<UserInfo />);
-            setActiveButton('')
-        } else if (location.pathname === '/user/manager/payment') {
-            setCurrentContent(<Payment />);
-            setActiveButton('payment')
-        } else if (location.pathname === '/user/manager/post/create') {
-            setCurrentContent(<CreatePost />);
-            setActiveButton('createPost')
-        } else if (location.pathname === '/user/manager/post') {
-            setCurrentContent(<ManagerPost />);
+        if (location.pathname === '/employee/manager/user') {
+            setCurrentContent(<UserManager />);
+            setActiveButton('userManage')
+        } else if (location.pathname === '/employee/manager/post') {
+            setCurrentContent(<ApprovePost />);
             setActiveButton('postManager')
-        } else if (location.pathname.includes('/user/manager/post/edit/')) {
-            setCurrentContent(<EditPost />);
-        } else if (location.pathname.includes('/user/manager/post/extend/')) {
-            setCurrentContent(<ExtendPost user={user} />);
-        } else if (location.pathname.includes('/user/manager/post/service/')) {
-            setCurrentContent(<PostService user={user} />);
-        } else if (location.pathname === '/user/manager/edit/profile') {
+        } 
+         else if (location.pathname === '/employee/manager/edit/profile') {
             setCurrentContent(<EditUser />);
             setActiveButton('userProfile')
-        } else if (location.pathname === '/user/manager/payment/history') {
-            setCurrentContent(<HistoryPayment />);
+        } else if (location.pathname === '/employee/manager/payment/history') {
+            setCurrentContent(<ManagePayment />);
             setActiveButton('historyMoney')
         }
         else{
@@ -84,20 +70,17 @@ const UserDashboard = () => {
     const handleNavigation = (content,buttonName) => {
          setCurrentContent(content);
          setActiveButton(buttonName);
-         if(buttonName==='payment')
-             navigate('/user/manager/payment')
-         else if(buttonName==='createPost')
-             navigate('/user/manager/post/create')
-         else if(buttonName==='postManager')
-             navigate('/user/manager/post')
-         else if(buttonName==='userProfile')
-             navigate('/user/manager/edit/profile')
-         else if(buttonName==='userInfo')
-             navigate('/user/manager')
-         else if(buttonName==='historyMoney')
-            navigate('/user/manager/payment/history')
+        
+        if(buttonName==='userManage')
+            navigate('/employee/manager/user')
+        else if(buttonName==='postManager')
+            navigate('/employee/manager/post')
+        else if(buttonName==='userProfile')
+            navigate('/employee/manager/edit/profile')
+        else if(buttonName==='historyMoney')
+            navigate('/employee/manager/payment/history')
         else
-            navigate('/user/manager/change/password')
+            navigate('/employee/manager/change/password')
 
      };
 
@@ -106,7 +89,7 @@ const UserDashboard = () => {
     };
 
     const formatCurrency = (amount) => {
-        if (amount === undefined || amount === null) {
+        if (amount === undefined || amount === null || !userInfo.roles.includes('ROLE_USER')) {
             return 'N/A';
         }
         return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' đ';
@@ -122,32 +105,25 @@ const UserDashboard = () => {
                             <img src={`http://localhost:8080${user.avatar}`} alt="" className="avatar" />
                         </div>
                         <div className='user-details'>
-                            <button className='userName-click' onClick={() => handleNavigation(<UserInfo />,'userInfo')}>
+                            {/* <button className='userName-click' onClick={() => handleNavigation(<UserInfo />,'userInfo')}> */}
                                 <label>
                                     {user.userName}
                                 </label>
-                            </button>
+                            {/* </button> */}
                             <label className='price'>{formatCurrency(user.balance)}</label>
                         </div>
                     
                 </div>
                 <div className='dashboard'>
 
-                    <button className={activeButton === 'payment' ? 'button-click' : ''} onClick={() => handleNavigation(<Payment />,'payment')}>
+                    <button className={activeButton === 'userManage' ? 'button-click' : ''} onClick={() => handleNavigation(<UserManager/>,'userManage')}>
                         <label>
-                            <i className="fa-solid fa-dollar-sign w-20"></i>
-                            <span>Nạp tiền</span>
+                            <i className="fa-solid fa-user w-20"></i>
+                            <span>Quản lý người dùng</span>
                         </label>
                     </button>
-                    
-                    <button className={activeButton === 'createPost' ? 'button-click' : ''} onClick={() => handleNavigation(<CreatePost />,'createPost')}>
-                        <label>
-                            <i className="fa-solid fa-pen-to-square  w-20"></i>
-                            <span>Đăng bài</span>
-                        </label>
-                    </button>
-
-                    <button className={activeButton === 'postManager' ? 'button-click' : ''} onClick={() => handleNavigation(<ManagerPost/>,'postManager')}>
+                   
+                    <button className={activeButton === 'postManager' ? 'button-click' : ''} onClick={() => handleNavigation(<ApprovePost/>,'postManager')}>
                         <label>
                             <i className="fa-solid fa-table-list w-20"></i>
                             <span>Quản lý bài đăng</span>
@@ -169,7 +145,7 @@ const UserDashboard = () => {
                         </label>
                     </button>
 
-                    <button className={activeButton === 'historyMoney' ? 'button-click' : ''} onClick={() => handleNavigation(<HistoryPayment />,'historyMoney')}>
+                    <button className={activeButton === 'historyMoney' ? 'button-click' : ''} onClick={() => handleNavigation(<ManagePayment />,'historyMoney')}>
                         <label>
                             <i className="fa-solid fa-file-invoice-dollar w-20"></i>
                             <span>Lịch sử nạp tiền</span>
@@ -192,4 +168,4 @@ const UserDashboard = () => {
     );
 };
 
-export default UserDashboard;
+export default EmployeeDashboard;

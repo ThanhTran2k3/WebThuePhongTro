@@ -1,30 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { getPost } from '../../api/postApi';
-import PostCard from './PostCard';
 import FormLocation from './FormLocation';
 import { getRoomType } from "../../api/roomTypeApi";
 import Post from './Post';
 import Pagination from '@mui/material/Pagination';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ListPost = () => {
     const [listPost, setListPost] = useState([])
     const [totalPage, setTotalPage] = useState()
     const [listRoomType, setListRoomType] = useState([])
     const [selectedRoomType, setSelectedRoomType] = useState("0")
+    const navigate = useNavigate();
+    const [page, setPage] = useState(1);        
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const pageUrl = queryParams.get('page');
+    const newPage = pageUrl ? Number(pageUrl) : 1; 
 
     useEffect(() => {
         const fetchData = async () => {
-            const result = await getPost();
-            const roomTypes = await getRoomType();
-            setListPost(result.listPost);
+            const result = await getPost(newPage);
+            setPage(result.currentPage)
+            setListPost(result.content);
             setTotalPage(result.totalPage)
+        };
+        fetchData();
+    }, [newPage]); 
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const roomTypes = await getRoomType();
+
             setListRoomType(roomTypes);
         };
         fetchData();
     }, []); 
 
- const handleRoomTypeChange = (event) => {
+    const handleRoomTypeChange = (event) => {
         setSelectedRoomType(event.target.value); 
+    };
+
+    const handlePageChange = async (event,value) => {
+        navigate(`?page=${value}`);
     };
 
     return (
@@ -42,6 +60,7 @@ const ListPost = () => {
                                 rentPrice = {item.rentPrice}
                                 city = {item.city}
                                 district = {item.district}
+                                userName = {item.userName}
                         />
 
                     ))
@@ -49,7 +68,7 @@ const ListPost = () => {
                     <p>Không có dữ liệu để hiển thị.</p>
                 )}
                 <div className="mx-auto mt-5">
-                    <Pagination count={totalPage} variant="outlined" shape="rounded" />
+                    <Pagination count={totalPage} page={page} onChange={handlePageChange} variant="outlined" shape="rounded" />
                 </div>
             </div>
             

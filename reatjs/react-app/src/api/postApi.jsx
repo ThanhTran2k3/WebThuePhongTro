@@ -3,9 +3,13 @@ import Swal from "sweetalert2";
 
 const postApi = 'http://localhost:8080/api/post';
 
-export const getPost = async()=>{
+export const getPost = async(page)=>{
     try{
-        const response = await axios.get(`${postApi}`)
+        const response = await axios.get(`${postApi}`,{
+            params: {
+                page: page
+            }
+        })
         return response.data.result
     }catch(error){
         console.error('Error get post:', error);
@@ -21,6 +25,25 @@ export const getPostById = async(userInfo,postId,navigate) =>{
             }
         })
         return response.data.result
+    }catch(error){
+        navigate('/error');
+        return {}; 
+    }
+}
+
+export const getPostManager = async (userInfo,navigate,page,postType) =>{
+    try{
+        const response = await axios.get(`${postApi}/management/post`,{
+            params: {
+                page: page,
+                postType: postType
+            },
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        })
+        return response.data.result
+        
     }catch(error){
         navigate('/error');
         return {}; 
@@ -76,6 +99,23 @@ export const editPost = async(formData,postId,userInfo,navigate) =>{
             title: "Error",
             html: errorMessage.map(err => `${err.split(':')[1]}<br>`).join('')
         });
+    });
+}
+
+export const deletePost = async(userInfo,postId,navigate,action) =>{
+
+    await axios.put(`${postApi}/delete/${postId}`,{}, {
+        params: {
+            action: action,
+        },
+        headers: {
+            Authorization: `Bearer ${userInfo.token}`
+        }
+    }).then(response =>{
+        if(response.status === 200)
+            navigate('/employee/manager/post');
+    }).catch(error =>{
+        navigate('/error');
     });
 }
 
@@ -166,6 +206,32 @@ export const servicePost = async(userInfo,postId,day,service,updatePostOfUser) =
 }
 
 
+export const postSuggestions = async (query) => {
+    try {
+        const response = await axios.get(`${postApi}/search/suggestions`,{
+            params: {
+                query: query,
+            },
+        });
+        return response.data.result;
+    } catch (error) {
+        return [];
+    }
+};
+
+export const postSearch = async (query,page) => {
+    try {
+        const response = await axios.get(`${postApi}/search/result`,{
+            params: {
+                query: query,
+                page: page
+            },
+        });
+        return response.data.result;
+    } catch (error) {
+        return [];
+    }
+};
 
 
 

@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,16 +33,15 @@ public class AuthenticationService {
 
     private final UserRepository userRepository;
 
-    private final UserPostRepository userPostRepository;
+    private final UserPostService userPostService;
 
     @Value("${jwt.secretKey}")
     private String secretKey;
 
     public AuthenticationResponse login(AuthenticationLoginRequest authenticationRequest) throws JOSEException {
-
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user;
-        if(authenticationRequest.getUserName().contains("@")){
+        if(authenticationRequest.getUserName().contains("@gmail")){
             user = userRepository.findByEmail(authenticationRequest.getUserName())
                     .orElseThrow(()->new AppException(ErrorCode.ERROR_USER_LOGIN));
         }
@@ -55,15 +55,19 @@ public class AuthenticationService {
 
         if(!auth)
             throw new AppException(ErrorCode.ERROR_USER_LOGIN);
+        if(!user.isStatus())
+            throw new AppException((ErrorCode.BLOCK_ACCOUNT));
 
         String token = generateToken(user);
-
+        List<String> roles = user.getRoles().stream().map(Role::getRoleName).toList();
         return AuthenticationResponse.builder()
                 .token(token)
                 .userName(user.getUsername())
                 .avatar(user.getAvatar())
-                .likePost(userPostRepository.getLikePostOfUser(user.getUserId())
-                                    .stream().map(PostService::convertToDTO).toList())
+                .roles(roles)
+                .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList())
                 .build();
     }
 
@@ -78,8 +82,9 @@ public class AuthenticationService {
                     .token(token)
                     .userName(user.getUsername())
                     .avatar(user.getAvatar())
-                    .likePost(userPostRepository.getLikePostOfUser(user.getUserId())
-                            .stream().map(PostService::convertToDTO).toList())
+                    .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                            .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                            .toList())
                     .build();
         }
         return null;
@@ -94,8 +99,9 @@ public class AuthenticationService {
                 .token(token)
                 .userName(user.getUsername())
                 .avatar(user.getAvatar())
-                .likePost(userPostRepository.getLikePostOfUser(user.getUserId())
-                        .stream().map(PostService::convertToDTO).toList())
+                .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList())
                 .build();
     }
 
@@ -138,6 +144,6 @@ public class AuthenticationService {
             SignedJWT signedJWT = SignedJWT.parse(token);
             return signedJWT.getJWTClaimsSet().getSubject();
         }
-        return null;
+        throw new AppException(ErrorCode.USER_NOT_EXIST);
     }
 }

@@ -4,6 +4,8 @@ import WebThuePhongTro.WebThuePhongTro.Model.Post;
 import WebThuePhongTro.WebThuePhongTro.Model.User;
 import WebThuePhongTro.WebThuePhongTro.Model.UserPost;
 import WebThuePhongTro.WebThuePhongTro.Model.UserPostId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,5 +40,28 @@ public interface UserPostRepository extends JpaRepository<UserPost, UserPostId> 
     @Query("UPDATE UserPost up SET up.isLiked = :isLike  WHERE up.user.userId = :userId AND up.post.postId = :postId")
     void update(@Param("userId") int userId,@Param("postId")int postId,@Param("isLike")boolean isLike);
 
+    @Query("SELECT up.post FROM UserPost up WHERE up.user.userId = :userId " +
+            "AND up.userCreate = true AND up.post.status = true " +
+            "AND up.post.approvalStatus = true " +
+            "AND up.post.expirationDate > CURRENT_DATE ")
+    Page<Post> getPostShowOfUser(@Param("userId") int userId, Pageable pageable);
+
+    @Query("SELECT up.post FROM UserPost up WHERE up.user.userId = :userId " +
+            "AND up.userCreate = true AND up.post.status = false " +
+            "AND up.post.approvalStatus = true " +
+            "AND up.post.expirationDate > CURRENT_DATE ")
+    Page<Post> getPostHiddenOfUser(@Param("userId") int userId, Pageable pageable);
+
+    @Query("SELECT up.post FROM UserPost up WHERE up.user.userId = :userId " +
+            "AND up.userCreate = true AND up.post.expirationDate < CURRENT_DATE ")
+    Page<Post> getPostExpiredOfUser(@Param("userId") int userId, Pageable pageable);
+
+    @Query("SELECT up.post FROM UserPost up WHERE up.user.userId = :userId " +
+            "AND up.userCreate = true AND up.post.approvalStatus IS NULL ")
+    Page<Post> getPostPendingOfUser(@Param("userId") int userId, Pageable pageable);
+
+    @Query("SELECT up.post FROM UserPost up WHERE up.user.userId = :userId " +
+            "AND up.userCreate = true AND up.post.approvalStatus = false ")
+    Page<Post> getPostRejectedOfUser(@Param("userId") int userId, Pageable pageable);
 
 }

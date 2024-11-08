@@ -6,11 +6,13 @@ import moment from 'moment';
 import PostList from '../Post/PostList';
 
 
+
 const UserInfo = () => {
     const { userInfo } = useUser();
-    const [listPost, setListPost] = useState([])
+
     const [selectedAction, setSelectedAction] = useState(null);
     const [user, setUser] = useState({})
+    
     const { userName } = useParams()
     const currentUserName = userName || userInfo.userName;
     const [activeButton, setActiveButton] = useState('post');
@@ -21,20 +23,15 @@ const UserInfo = () => {
         
         const fetchData = async () => {
             const result = await getInfoUser(currentUserName,navigate)
-            if(result && result.user){
-                setUser(result.user)
-                setListPost(result.listPost.filter(item => item.status === true && item.approvalStatus === true && new Date(item.expirationDate).getTime() > new Date().getTime()))
-            }
-            
+
+                setUser(result)
         };
         
         fetchData();
+        setSelectedAction(<PostList />);
         window.scrollTo(0, 0); 
     },[currentUserName,navigate])
 
-    useEffect(() => {
-        setSelectedAction(<PostList listPost={listPost} />);
-    }, [listPost]); 
 
     
     const handleButtonClick = (action,buttonName) => {
@@ -62,7 +59,7 @@ const UserInfo = () => {
                         </label>
                         <label>
                             <i className="fa-solid fa-location-dot w-20"></i>
-                            <span>{user.district+', '+user.city}</span>
+                            <span>{`${!user.district||!user.city?'Chưa cập nhật':`${user.district}, ${user.city}`}`}</span>
                         </label>
                         <label>
                             <i className="fa-solid fa-calendar-days w-20"></i>
@@ -79,7 +76,7 @@ const UserInfo = () => {
 
                 <div className="col-md-9 m-2">
                     <div className='btn-option'>
-                        <button className={`btn ${activeButton==='post'?'red-underline':''}`} onClick={() => handleButtonClick(<PostList listPost={listPost}/>,'post')}>
+                        <button className={`btn ${activeButton==='post'?'red-underline':''}`} onClick={() => handleButtonClick(<PostList/>,'post')}>
                             Tin đăng
                         </button>
                         <button className={`btn ${activeButton==='repost'?'red-underline':''}`} onClick={() => handleButtonClick('action2','repost')}>

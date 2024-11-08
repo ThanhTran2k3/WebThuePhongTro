@@ -13,8 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,13 +92,19 @@ public class User implements UserDetails {
     private boolean status;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate joinDate;
+    private LocalDateTime joinDate;
 
     @OneToMany(mappedBy = "user")
     private Set<Invoice> users;
 
     @OneToMany(mappedBy = "user")
-    Set<UserPost> userPosts;
+    private Set<UserPost> userPosts;
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    private Set<Message> sentMessages;
+
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    private Set<Message> receivedMessages;
 
     @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(name = "User_Role",

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { getInvoiceOfUser } from '../../api/invoiceApi';
+import { getAllInvoice } from '../../api/invoiceApi';
 import { useUser } from '../../UserContext';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Pagination from '@mui/material/Pagination';
 
-const HistoryPayment = () => {
+const ManagePayment = () => {
 
     const [activeButton, setActiveButton] = useState('all');
     const { userInfo } = useUser();
@@ -24,7 +24,7 @@ const HistoryPayment = () => {
 
     useEffect(() => {
         const fetchData = async (pageNum, service) => {
-            const result = await getInvoiceOfUser(userInfo, navigate, pageNum, service);
+            const result = await getAllInvoice(userInfo, navigate, pageNum, service);
             setListInvoice(result.content);
             setTotalPage(result.totalPage);
             setPage(result.currentPage);
@@ -102,4 +102,4 @@ const HistoryPayment = () => {
     );
 };
 
-export default HistoryPayment;
+export default ManagePayment;

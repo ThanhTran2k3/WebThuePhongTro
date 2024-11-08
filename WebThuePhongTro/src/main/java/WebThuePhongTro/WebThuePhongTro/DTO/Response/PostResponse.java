@@ -35,6 +35,6 @@ public class PostResponse {
     private PostCategory postCategory;
     private boolean status;
     private Boolean approvalStatus;
-
+    private String userName;
 }
 

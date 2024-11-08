@@ -2,9 +2,7 @@ package WebThuePhongTro.WebThuePhongTro.Controller;
 
 
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.UserEditRequest;
-import WebThuePhongTro.WebThuePhongTro.DTO.Response.ApiResponse;
-import WebThuePhongTro.WebThuePhongTro.DTO.Response.AuthenticationResponse;
-import WebThuePhongTro.WebThuePhongTro.DTO.Response.UserInfoResponse;
+import WebThuePhongTro.WebThuePhongTro.DTO.Response.*;
 import WebThuePhongTro.WebThuePhongTro.Model.Post;
 import WebThuePhongTro.WebThuePhongTro.Model.User;
 import WebThuePhongTro.WebThuePhongTro.Service.AuthenticationService;
@@ -12,11 +10,11 @@ import WebThuePhongTro.WebThuePhongTro.Service.PostService;
 import WebThuePhongTro.WebThuePhongTro.Service.UserPostService;
 import WebThuePhongTro.WebThuePhongTro.Service.UserService;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +37,7 @@ public class UserController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
 
     @GetMapping("/detail")
     public ResponseEntity<?> detailUser(HttpServletRequest request) throws ParseException, JOSEException {
@@ -83,17 +82,50 @@ public class UserController {
     @GetMapping("/{userName}")
     public ResponseEntity<?> infoUser(@PathVariable("userName") String userName){
        User user = userService.findByUserName(userName);
-       List<Post> posts = userPostService.getPostCreateByUser(user.getUserId());
-       UserInfoResponse userInfoResponse = UserInfoResponse.builder()
-                .user(userService.convertToUserResponse(user))
-                .listPost(posts.stream().map(PostService::convertToDTO).toList())
-                .build();
-
+       UserResponse userResponse = userService.convertToUserResponse(user);
        return  ResponseEntity.ok(ApiResponse.builder()
                .success(true)
                .time(LocalDateTime.now())
-               .result(userInfoResponse)
+               .result(userResponse)
                .build());
+    }
+
+    @GetMapping("/post/{userName}")
+    public ResponseEntity<?> postUser(@PathVariable("userName") String userName,
+                                      @RequestParam(defaultValue = "1") int page,
+                                      @RequestParam(defaultValue = "postDisplays") String postType){
+        User user = userService.findByUserName(userName);
+        Page<PostResponse> postResponses = userPostService.getPostOfUser(user.getUserId(),page,postType);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(postResponses.getTotalPages())
+                .content(postResponses.getContent())
+                .build();
+        return  ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(pageResponse)
+                .build());
+    }
+
+    @GetMapping("/role/user")
+    public ResponseEntity<?> roleUser(@RequestParam String type,@RequestParam(defaultValue = "1")int page){
+        Page<UserResponse> userResponses = userService.getRoleUser(type,page);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(userResponses.getTotalPages())
+                .content(userResponses.getContent())
+                .build();
+        return  ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(pageResponse)
+                .build());
+    }
+
+    @PutMapping("/block/{userName}")
+    public void postUser(@PathVariable("userName") String userName){
+        userService.blockUser(userName);
     }
 
 }

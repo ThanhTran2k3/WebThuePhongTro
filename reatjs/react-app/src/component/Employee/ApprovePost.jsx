@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useUser } from '../../UserContext';
+import PostList from '../Post/PostList';
 import { useNavigate } from 'react-router-dom';
-import PostList from './PostList';
 
-
-const ManagerPost = () => {
-
-    const [selectedAction, setSelectedAction] = useState(<PostList/>);
+const ApprovePost = () => {
+    
     const [activeButton, setActiveButton] = useState('postDisplays');
-    const { postOfUser } = useUser();
+    const [selectedAction, setSelectedAction] = useState(<PostList/>);
     const navigate = useNavigate()
 
 
@@ -20,7 +17,7 @@ const ManagerPost = () => {
         if (activeButton) {
             setSelectedAction(<PostList postType={activeButton}/>)
         }
-    },[activeButton,postOfUser])
+    },[activeButton])
 
     return (
         
@@ -28,12 +25,6 @@ const ManagerPost = () => {
             <div className='btn-postpption'>
                 <button className={`btn ${activeButton==='postDisplays'?'red-underline':''}`} onClick={() => handleButtonClick('postDisplays')}>
                     Tin đang hiển thị
-                </button>
-                <button className={`btn ${activeButton==='postHidden'?'red-underline':''}`} onClick={() => handleButtonClick('postHidden')}>
-                    Tin đang ẩn
-                </button>
-                <button className={`btn ${activeButton==='postExpired'?'red-underline':''}`} onClick={() => handleButtonClick('postExpired')}>
-                    Tin hết hạn
                 </button>
                 <button className={`btn ${activeButton==='postPending'?'red-underline':''}`} onClick={() => handleButtonClick('postPending')}>
                     Tin chờ duyệt
@@ -49,4 +40,4 @@ const ManagerPost = () => {
     );
 };
 
-export default ManagerPost;
+export default ApprovePost;

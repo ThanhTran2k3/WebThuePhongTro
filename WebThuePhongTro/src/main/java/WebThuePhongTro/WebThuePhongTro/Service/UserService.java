@@ -11,6 +11,10 @@ import WebThuePhongTro.WebThuePhongTro.Repository.UserRepository;
 import WebThuePhongTro.WebThuePhongTro.Role;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,7 +56,7 @@ public class UserService {
 
         user.setBalance(BigDecimal.valueOf(0));
         user.setStatus(true);
-        user.setJoinDate(LocalDate.now());
+        user.setJoinDate(LocalDateTime.now());
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         Set<WebThuePhongTro.WebThuePhongTro.Model.Role> roles = new HashSet<>();
         roles.add(roleRepository.findById(Role.ROLE_USER.value).orElseThrow());
@@ -117,6 +121,25 @@ public class UserService {
                 .address(user.getAddress())
                 .balance(user.getBalance())
                 .joinDate(user.getJoinDate())
+                .status(user.isStatus())
                 .build();
     }
+
+    public Page<UserResponse> getRoleUser(String type, int page){
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(Sort.Direction.DESC, "joinDate"));
+        if(type.equals("active"))
+            return userRepository.findByStatusAndRoles_RoleName(true,"ROLE_USER",pageable)
+                    .map(this::convertToUserResponse);
+        else
+            return userRepository.findByStatusAndRoles_RoleName(false,"ROLE_USER",pageable)
+                    .map(this::convertToUserResponse);
+    }
+
+
+    public void blockUser(String userName){
+        User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
+        user.setStatus(!user.isStatus());
+        userRepository.save(user);
+    }
+
 }

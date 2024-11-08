@@ -10,11 +10,11 @@ const FooterWeb = () => {
                     <h5 className="my-2">Liên hệ</h5>
                     <p className="lead mb-2">
                         <i className="fa-solid fa-envelope"></i>
-                        <span className="baseFont info-color ml-5">@users.Email</span>
+                        <span className="baseFont info-color ml-5">admin@gmail.com</span>
                     </p>
                     <p className="lead mb-2">
                         <i className="fa-solid fa-phone"></i>
-                        <span className="baseFont info-color ml-5">@users.PhoneNumber</span>
+                        <span className="baseFont info-color ml-5">0123456789</span>
                     </p>
                 </div>
                 <div className="w-50">

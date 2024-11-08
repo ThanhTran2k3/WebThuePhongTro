@@ -7,10 +7,12 @@ import WebThuePhongTro.WebThuePhongTro.Model.User;
 import WebThuePhongTro.WebThuePhongTro.Repository.InvoiceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,18 +26,43 @@ public class InvoiceService {
 
     private final WebService webService;
 
-    public List<Invoice> getAllInvoice(){
-        return invoiceRepository.findAll();
-    }
 
     public void addInvoice(Invoice invoice){
         invoiceRepository.save(invoice);
     }
 
-    public List<InvoiceResponse> getInvoiceOfUser(String userName){
-        return invoiceRepository.findAll().stream()
-                .filter(s->s.getUser().getUsername().equals(userName)).map(InvoiceService::convertToDTO).toList();
+    public Page<InvoiceResponse> getInvoiceOfUser(String userName, int page,String service){
+        Pageable pageable = PageRequest.of(page-1, 5, Sort.by(Sort.Direction.DESC, "issueDate"));
+        if(service== null)
+            return invoiceRepository.findByUser_UserName(userName,pageable)
+                    .map(InvoiceService::convertToDTO);
+        else if (service.equals("Nạp tiền")) {
+            return invoiceRepository.findByUser_UserNameAndService_ServiceName(userName,service,pageable)
+                    .map(InvoiceService::convertToDTO);
+        }
+        else
+            return invoiceRepository.findByUser_UserNameAndService_ServiceNameNot(userName,"Nạp tiền",pageable)
+                    .map(InvoiceService::convertToDTO);
     }
+
+
+    public Page<InvoiceResponse> getAllInvoice(int page,String service){
+        Pageable pageable = PageRequest.of(page-1, 5, Sort.by(Sort.Direction.DESC, "issueDate"));
+        if(service== null)
+            return invoiceRepository.findAll(pageable)
+                    .map(InvoiceService::convertToDTO);
+        else if (service.equals("Nạp tiền")) {
+            return invoiceRepository.Service_ServiceName(service,pageable)
+                    .map(InvoiceService::convertToDTO);
+        }
+        else
+            return invoiceRepository.Service_ServiceNameNot("Nạp tiền",pageable)
+                    .map(InvoiceService::convertToDTO);
+    }
+
+
+
+
 
     public void payment(String userName,String amount,String message){
         User user = userService.findByUserName(userName);

@@ -13,7 +13,10 @@ import { UserProvider } from './UserContext.jsx';
 import UserInfo from './component/User/UserInfo.jsx';
 import FavoritePost from './component/Post/FavoritePost.jsx';
 import ChatApp from './component/Chat/ChatApp.jsx';
-import PostList from './component/Post/PostList.jsx';
+import PrivateRoute from './component/Route/PrivateRoute.jsx';
+import EmployeeDashboard from './component/Employee/EmployeeDashboard.jsx';
+import BlockAccount from './component/error/BlockAccount.jsx';
+import SearchResult from './component/Post/SearchResult.jsx';
 
 
 function App() {
@@ -29,9 +32,21 @@ function App() {
           <Routes>
             <Route path="/" element={<ListPost />} />
             <Route path="/post/:postId" element={<DetailsPost />} />
-            <Route path='/register' element={<Register />}/>
             <Route path='/login' element={<Login />}/>
             <Route path='/user/:userName' element={<UserInfo/>}/>
+            <Route path='/search' element={<SearchResult/>}/>
+
+            <Route element={<PrivateRoute roles={['ROLE_EMPLOYEE']} />}>
+              <Route path="/employee/manager" element={<EmployeeDashboard />} />
+              <Route path="/employee/manager/post" element={<EmployeeDashboard />} />
+              <Route path="/employee/manager/payment/history" element={<EmployeeDashboard />} />
+              <Route path="/employee/manager/edit/profile" element={<EmployeeDashboard />} />
+              <Route path="/employee/manager/change/password" element={<EmployeeDashboard />} />
+              <Route path="/employee/manager/user" element={<EmployeeDashboard />} />
+            </Route>
+
+
+            <Route path='/register' element={<Register />}/>
             <Route path="/user/manager/payment" element={<UserDashboard />} />
             <Route path="/user/manager/post/create" element={<UserDashboard />} />
             <Route path="/user/manager/post" element={<UserDashboard />} />
@@ -44,6 +59,7 @@ function App() {
             <Route path='/user/manager' element={<UserDashboard/>}/>
             <Route path='/user/favorite/post' element={<FavoritePost/>}/>
             <Route path="/chat" element={<ChatApp />} />
+            <Route path="/block-account" element={<BlockAccount />} />
             <Route path="*" element={<Error />} />
           </Routes>
         </div>

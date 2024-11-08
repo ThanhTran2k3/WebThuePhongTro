@@ -5,13 +5,12 @@ import WebThuePhongTro.WebThuePhongTro.DTO.Response.ApiResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PageResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PostDetailResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PostResponse;
-import WebThuePhongTro.WebThuePhongTro.Exception.AppException;
-import WebThuePhongTro.WebThuePhongTro.Exception.ErrorCode;
 import WebThuePhongTro.WebThuePhongTro.Model.*;
 import WebThuePhongTro.WebThuePhongTro.Service.*;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.aspectj.weaver.ast.Literal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,9 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @RestController
@@ -43,10 +46,11 @@ public class PostController {
     @GetMapping("")
     public ApiResponse<Object> getAllPost(@RequestParam(defaultValue = "1") int page) {
 
-        Page<PostResponse> postResponses = postService.getAllPost(page).map(PostService::convertToDTO);
-        PageResponse pageResponse = PageResponse.builder()
+        Page<PostResponse> postResponses = postService.getAllPost(page);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
                 .totalPage(postResponses.getTotalPages())
-                .listPost(postResponses.getContent())
+                .content(postResponses.getContent())
                 .build();
         return ApiResponse.builder()
                 .success(true)
@@ -75,7 +79,7 @@ public class PostController {
                 return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)
                         .time(LocalDateTime.now())
-                        .result(PostService.convertToDTO(post))
+                        .result(PostService.convertToDTO(post,userName))
                         .build());
             }
         }
@@ -87,12 +91,12 @@ public class PostController {
     }
 
     @PutMapping("/delete/{postId}")
-    public ApiResponse<Void> deletePost(@PathVariable int postId) {
-
-
-        postService.deletePostById(postId);
+    public ApiResponse<Void> deletePost(@PathVariable int postId,@RequestParam(defaultValue = "delete") String action) {
+        postService.deletePostById(postId,action);
         return ApiResponse.<Void>builder().build();
     }
+
+
 
     @PutMapping("/edit/{postId}")
     public ResponseEntity<?> editPost(@PathVariable int postId,@ModelAttribute @Valid PostRequest postRequest, HttpServletRequest request) throws IOException, ParseException, JOSEException {
@@ -118,7 +122,9 @@ public class PostController {
                 boolean status = !post.isStatus();
                 post.setStatus(status);
                 postService.updatePost(post);
-                List<PostResponse> postResponses = postService.getAllPost().stream().map(PostService::convertToDTO).toList();
+                List<PostResponse> postResponses = postService.getAllPost().stream()
+                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList();
                 return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)
                         .time(LocalDateTime.now())
@@ -143,10 +149,11 @@ public class PostController {
                 ||(s.getCity().equals(post.getCity())&&s.getDistrict().equals(post.getDistrict()))
                 ||(s.getCity().equals(post.getCity()))))
                 .limit(10)
-                .map(PostService::convertToDTO).toList();
+                .map(item->PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                .toList();
 
         PostDetailResponse postDetailResponse = PostDetailResponse.builder()
-                .post(PostService.convertToDTO(post))
+                .post(PostService.convertToDTO(post,user.getUsername()))
                 .userCreate(userService.convertToUserResponse(user))
                 .posts(posts)
                 .build();
@@ -167,7 +174,8 @@ public class PostController {
             return ResponseEntity.ok(ApiResponse.builder()
                     .success(true)
                     .time(LocalDateTime.now())
-                    .result(userPostService.getLikePostOfUser(user.getUserId()).stream().map(PostService::convertToDTO))
+                    .result(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                            .map(item->PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername())))
                     .build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
@@ -186,7 +194,9 @@ public class PostController {
                 int month = requestBody.get("month");
                 int serviceId = requestBody.get("service");
                 postService.extendPost(userName, postId, month, serviceId);
-                List<PostResponse> postResponses = postService.getAllPost().stream().map(PostService::convertToDTO).toList();
+                List<PostResponse> postResponses = postService.getAllPost().stream()
+                        .map(item->PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList();
                 return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)
                         .time(LocalDateTime.now())
@@ -209,7 +219,9 @@ public class PostController {
                 int day = requestBody.get("day");
                 int serviceId = requestBody.get("service");
                 postService.servicePost(userName, postId, day, serviceId);
-                List<PostResponse> postResponses = postService.getAllPost().stream().map(PostService::convertToDTO).toList();
+                List<PostResponse> postResponses = postService.getAllPost().stream()
+                        .map(item->PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList();
                 return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)
                         .time(LocalDateTime.now())
@@ -225,5 +237,50 @@ public class PostController {
 
     }
 
+    @GetMapping("/management/post")
+    public ResponseEntity<?> postManager(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "postDisplays") String postType){
+        Page<PostResponse> postResponses = postService.getPostManager(page,postType);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(postResponses.getTotalPages())
+                .content(postResponses.getContent())
+                .build();
+        return  ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(pageResponse)
+                .build());
+    }
+
+    @GetMapping("/search/suggestions")
+    public ResponseEntity<?> searchSuggestions(@RequestParam String query)
+    {
+        List<String> listSuggestions = postService.suggestions(query);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .time(LocalDateTime.now())
+                        .result(listSuggestions)
+                        .build()
+        );
+    }
+
+    @GetMapping("/search/result")
+    public ResponseEntity<?> searchResult(@RequestParam String query, @RequestParam(defaultValue = "1")int page)
+    {
+        Page<PostResponse> postResponses = postService.searchResult(query,page);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(postResponses.getTotalPages())
+                .content(postResponses.getContent())
+                .build();
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .time(LocalDateTime.now())
+                        .result(pageResponse)
+                        .build()
+        );
+    }
 
 }

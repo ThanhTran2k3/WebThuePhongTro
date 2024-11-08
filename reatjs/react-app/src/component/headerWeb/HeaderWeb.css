@@ -27,16 +27,29 @@ header {
 }
 
 
-#search-results {
-    position: absolute; 
-    top: 100%; 
-    left: 0; 
-    width: 100%; 
-    z-index: 1000;
-    background-color: white;
-    border: 1px solid #ccc; 
+.search-results {
     display: none; 
 }
+
+.search-input:focus + .search-results {
+    display: block; 
+}
+
+.search-results:hover{
+    display: block;
+}
+
+.dropdown-content {
+    position: absolute; /* Đặt vị trí tuyệt đối cho dropdown */
+    z-index: 1000; /* Đặt z-index cao để hiển thị trên các phần tử khác */
+    width: 100%; /* Đảm bảo dropdown chiếm toàn bộ chiều rộng */
+    background-color: white; /* Thay đổi màu nền nếu cần */
+    border: 1px solid #ccc; /* Thêm viền cho dropdown */
+    max-height: 200px; /* Thiết lập chiều cao tối đa */
+    overflow-y: auto; /* Thêm cuộn nếu cần */
+    top: 100%;
+}
+
 .suggestion {
     padding: 10px;
     cursor: pointer;
@@ -62,13 +75,6 @@ pointer-events: none;
     pointer-events: auto;
 }
 
-.dropdown-content {
-    position: absolute;
-    z-index: 1000;
-    background-color: white;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    min-width: 160px;
-}
 
 
 .user-info {

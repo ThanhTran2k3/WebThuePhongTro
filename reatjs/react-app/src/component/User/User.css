@@ -15,7 +15,9 @@
     padding: 3px;
 }
 
-
+.w-33{
+    width: 33%!important;
+}
 .user-details p, .user-details label {
     text-align: left;
 }

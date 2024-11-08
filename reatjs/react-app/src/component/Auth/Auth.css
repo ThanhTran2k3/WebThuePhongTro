@@ -73,3 +73,7 @@ a {
     a:hover {
         color: #444;
     }
+
+.login{
+    border-radius: 10px;
+}

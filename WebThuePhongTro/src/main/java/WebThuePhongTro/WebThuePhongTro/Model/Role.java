@@ -1,5 +1,6 @@
 package WebThuePhongTro.WebThuePhongTro.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -25,6 +26,7 @@ public class Role implements GrantedAuthority {
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 
 

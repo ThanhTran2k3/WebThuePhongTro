@@ -3,6 +3,7 @@ import './HeaderWeb.css'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useUser } from '../../UserContext';
+import { postSuggestions } from '../../api/postApi';
 
 
 const HeaderWeb = () => {
@@ -10,19 +11,43 @@ const HeaderWeb = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { userInfo, logout  } = useUser();
+    const [suggestions, setSuggestions] = useState([]);
+    const [query, setQuery] = useState('');
 
     useEffect(() => {
-        setShowMenu(false); 
-    }, [location.pathname]); 
+        setShowMenu(false);
+        setQuery('')
+        const fetchData = async () => {
+            const suggestion = await postSuggestions("")
+            setSuggestions(suggestion)
+        };
 
+        fetchData();
+    }, [location.pathname]); 
 
     const handleMenuToggle = () => {
         setShowMenu(!showMenu);
     };
 
+    const handleChange = async (e) => {
+        const query = e.target.value;
+        const suggestion = await postSuggestions(query)
+        setSuggestions(suggestion)
+        setQuery(query)
+    };
+    const handleSuggestionClick = async (item) => {
+        setQuery(item)
+        const suggestion = await postSuggestions(item)
+        setSuggestions(suggestion)
+    };
+
     const handleChat = () => {
-        console.log("sjflks")
         navigate('/chat')
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        navigate(`/search?query=${query}`)
     };
 
     const handleLogout = () => {
@@ -57,10 +82,18 @@ const HeaderWeb = () => {
                     <div className="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul className="navbar-nav flex-grow-1">
                             <div className="search-bar position-absolute w-100 d-flex justify-content-center">
-                                <form id="search-form" action="search-results.html" method="get" className="dropdown">
+                                <form id="search-form" onSubmit={handleSearch} className="dropdown">
                                     <div className="input-group">
-                                        <input id="search-input" className="form-control" type="text" name="query" autoComplete="off" placeholder="Tìm bài đăng" required />
-                                        <div id="search-results" className="dropdown-content"></div>
+                                        <input onChange={handleChange} className="form-control search-input" value={query?query:''} type="text" name="query" autoComplete="off" placeholder="Tìm bài đăng" required />
+                                        <div id="search-results" className="dropdown-content search-results">
+                                            {Array.isArray(suggestions) && suggestions.length > 0 ? (
+                                                suggestions.map((item, index) => (
+                                                    <div onClick={() => handleSuggestionClick(item)} key={index} className='suggestion'>{item}</div>
+                                                ))
+                                            ) : (
+                                                <div className='suggestion'>Không có kết quả</div>
+                                            )}
+                                        </div>
                                         <button className="btn btn-outline-dark bg-white btn-search" type="submit">
                                             <i className="me-1">Tìm kiếm</i>
                                         </button>
@@ -86,7 +119,7 @@ const HeaderWeb = () => {
                                 <div className="menu">
                                     <ul>
                                         <li>
-                                            <Link to={'user/manager'}>
+                                            <Link to={`${userInfo.roles.includes('ROLE_USER')?'user/manager':'employee/manager/user'}`}>
                                                 <label>
                                                     <i className="fa-solid fa-user w-20"></i>
                                                     <span>Tài khoản</span>
@@ -94,14 +127,17 @@ const HeaderWeb = () => {
                                             </Link>
                                         </li>
 
-                                        <li>
-                                            <Link to={`user/favorite/post`}>
-                                                <label>
-                                                    <i className="fa-solid fa-heart w-20"></i>
-                                                    <span>Yêu thích</span>
-                                                </label>
-                                            </Link>
-                                        </li>
+                                        {!userInfo.roles.includes('ROLE_EMPLOYEE')&&(
+                                            <li>
+                                                <Link to={`user/favorite/post`}>
+                                                    <label>
+                                                        <i className="fa-solid fa-heart w-20"></i>
+                                                        <span>Yêu thích</span>
+                                                    </label>
+                                                </Link>
+                                            </li>
+                                        )}
+                                        
 
                                         <li>
                                             <button onClick={handleLogout} className="logout-button">

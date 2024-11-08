@@ -12,7 +12,11 @@ export const login = async (data,updateUser,navigate) =>{
     }).then(response =>{
         sessionStorage.setItem("userinfo", JSON.stringify(response.data.result));
         updateUser(response.data.result);
-        navigate('/');
+        if(response.data.result.roles.includes('ROLE_EMPLOYEE'))
+            navigate('/employee/manager/user')
+        else
+            navigate('/');
+        
     }).catch(error =>{
         Swal.fire({
             icon: "error",
