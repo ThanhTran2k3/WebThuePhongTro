@@ -6,10 +6,10 @@ const UserContext = createContext();
 
 
 export const UserProvider = ({ children }) => {
-      const [userInfo, setUserInfo] = useState(() => {
-          const savedUser = sessionStorage.getItem('userinfo');
-          return savedUser ? JSON.parse(savedUser) : null;
-      });
+    const [userInfo, setUserInfo] = useState(() => {
+        const savedUser = sessionStorage.getItem('userinfo');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
 
     const [postOfUser, setPostOfUser] = useState([]);
 
@@ -24,6 +24,7 @@ export const UserProvider = ({ children }) => {
       }
     }, [userInfo]);
 
+    
   const updateUser = (newUserInfo) => {
     setUserInfo((prev) => ({
       ...prev,
@@ -39,7 +40,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ userInfo, updateUser,logout, postOfUser,updatePostOfUser  }}>
+    <UserContext.Provider value={{ userInfo, updateUser,logout, setUserInfo,updatePostOfUser,postOfUser }}>
       {children}
     </UserContext.Provider>
   );

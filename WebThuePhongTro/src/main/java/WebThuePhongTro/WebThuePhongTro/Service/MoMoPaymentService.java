@@ -35,7 +35,6 @@ public class MoMoPaymentService {
             requestBody.put("notifyUrl", notifyUrl);
             requestBody.put("requestType", "captureMoMoWallet");
 
-            // Tính toán chữ ký (signature)
             String rawData = String.format(
                     "partnerCode=%s&accessKey=%s&requestId=%s&amount=%d&orderId=%s&orderInfo=%s&returnUrl=%s&notifyUrl=%s&extraData=%s",
                     PARTNER_CODE, ACCESS_KEY, requestId, amount, orderId, orderInfo, returnUrl, notifyUrl, "");
@@ -44,16 +43,14 @@ public class MoMoPaymentService {
 
             requestBody.put("signature", signature);
 
-            // Gửi yêu cầu tới MoMo
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
 
-            // Thực hiện yêu cầu POST tới MoMo
             ResponseEntity<String> response = restTemplate.exchange(ENDPOINT, HttpMethod.POST, entity, String.class);
 
-            return response.getBody(); // Trả về kết quả từ MoMo
+            return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

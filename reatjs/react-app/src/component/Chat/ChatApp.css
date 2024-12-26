@@ -3,34 +3,6 @@
     max-height: 680px;
 }
 
-.create-chat-btn {
-    display: flex;
-    align-items: center;
-    background-color: #4CAF50;  /* Màu nền của nút */
-    color: white;               /* Màu chữ */
-    padding: 10px 20px;         /* Khoảng cách trong nút */
-    border-radius: 5px;         /* Bo góc */
-    border: none;               /* Bỏ viền */
-    cursor: pointer;           /* Con trỏ khi di chuột vào nút */
-    transition: background-color 0.3s ease;  /* Hiệu ứng chuyển màu nền khi hover */
-  }
-  
-  .create-chat-btn i {
-    font-size: 18px;  /* Kích thước biểu tượng */
-  }
-  
-  .create-chat-btn:hover {
-    background-color: #45a049;  /* Màu nền khi hover */
-  }
-  
-  .create-chat-btn:focus {
-    outline: none;  /* Bỏ viền khi nút được focus */
-  }
-  
-  .create-chat-btn label {
-    margin-left: 10px;  /* Khoảng cách giữa biểu tượng và văn bản */
-  }
-  
 .chat-container {
     width: 100%;
     height: 100%;
@@ -155,3 +127,18 @@
     font-size: 0.8rem;
     color: #888;
 }
+
+.unread-message {
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    margin-left: 8px;
+    text-align: center;
+    min-width: 20px;
+    height: 20px;
+    line-height: 18px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  }

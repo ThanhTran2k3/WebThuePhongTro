@@ -43,6 +43,7 @@ public class UserService {
 
     private final UserPostRepository userPostRepository;
 
+
     public List<User> getAllUser(){
         return userRepository.findAll();
     }
@@ -51,15 +52,22 @@ public class UserService {
         return userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
     }
 
+    public User findByEmail(String email){
+        return userRepository.findByEmail(email).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
+    }
 
-    public void add(User user) throws IOException {
+
+    public void add(User user,String role) throws IOException {
 
         user.setBalance(BigDecimal.valueOf(0));
         user.setStatus(true);
         user.setJoinDate(LocalDateTime.now());
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         Set<WebThuePhongTro.WebThuePhongTro.Model.Role> roles = new HashSet<>();
-        roles.add(roleRepository.findById(Role.ROLE_USER.value).orElseThrow());
+        if(role.equals("ROLE_USER"))
+            roles.add(roleRepository.findById(Role.ROLE_USER.value).orElseThrow());
+        else
+            roles.add(roleRepository.findById(Role.ROLE_EMPLOYEE.value).orElseThrow());
         user.setRoles(roles);
         userRepository.save(user);
     }
@@ -132,6 +140,16 @@ public class UserService {
                     .map(this::convertToUserResponse);
         else
             return userRepository.findByStatusAndRoles_RoleName(false,"ROLE_USER",pageable)
+                    .map(this::convertToUserResponse);
+    }
+
+    public Page<UserResponse> getRoleEmployee(String type, int page){
+        Pageable pageable = PageRequest.of(page-1, 3, Sort.by(Sort.Direction.DESC, "joinDate"));
+        if(type.equals("active"))
+            return userRepository.findByStatusAndRoles_RoleName(true,"ROLE_EMPLOYEE",pageable)
+                    .map(this::convertToUserResponse);
+        else
+            return userRepository.findByStatusAndRoles_RoleName(false,"ROLE_EMPLOYEE",pageable)
                     .map(this::convertToUserResponse);
     }
 

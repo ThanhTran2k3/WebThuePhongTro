@@ -89,4 +89,28 @@ public class InvoiceController {
                         .build()
         );
     }
+
+    @GetMapping("/statistic")
+    public ResponseEntity<?> getChart(@RequestParam int year) throws ParseException, JOSEException {
+
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .time(LocalDateTime.now())
+                        .result(invoiceService.getStatistic(year))
+                        .build()
+        );
+    }
+
+    @GetMapping("/statistic/time")
+    public ResponseEntity<?> getChartTime(@RequestParam int year,@RequestParam int month) throws ParseException, JOSEException {
+
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .time(LocalDateTime.now())
+                        .result(invoiceService.getStatisticByTime(month,year))
+                        .build()
+        );
+    }
 }

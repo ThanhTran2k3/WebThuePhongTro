@@ -43,3 +43,40 @@ export const getAllInvoice = async(userInfo,navigate,page,service)=>{
         return [];
     }
 }
+
+export const getStatistic = async (userInfo, year, navigate) => {
+    try {
+        const response = await axios.get(`${invoiceApi}/statistic`, {
+            params: {
+                year: year,
+            },
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+        return response.data.result;
+
+    } catch (error) {
+        navigate('/error');  
+        return []; 
+    }
+};
+
+export const getStatisticByTime = async (userInfo,month, year, navigate) => {
+    try {
+        const response = await axios.get(`${invoiceApi}/statistic/time`, {
+            params: {
+                month: month,
+                year: year,
+            },
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+        return response.data.result;
+
+    } catch (error) {
+        navigate('/error');  
+        return []; 
+    }
+};

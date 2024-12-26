@@ -38,6 +38,7 @@ export const getPostUser = async (userName,navigate,page,postType) =>{
                 postType: postType
             }
         })
+        
         return response.data.result
         
     }catch(error){
@@ -60,13 +61,35 @@ export const editUser = async(formData,userInfo,updateUser)=>{
             updateUser(response.data.result)
 
     }catch(error){
-        console.error(`Error `, error);
+        const errorMessage = error.response.data.error;
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    html: errorMessage.map(err => `${err.split(':')[1]}<br>`).join('')
+                });
     }
 }
 
 export const getRoleUser = async(userInfo,status,page)=>{
     try{
         const response = await axios.get(`${userApi}/role/user`, {
+            params:{
+                type: status,
+                page: page
+            },
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        })
+        return response.data.result   
+    }catch(error){
+        console.error(`Error `, error);
+    }
+}
+
+export const getRoleEmployee = async(userInfo,status,page)=>{
+    try{
+        const response = await axios.get(`${userApi}/role/employee`, {
             params:{
                 type: status,
                 page: page
@@ -94,5 +117,29 @@ export const blockUser = async(userInfo,userName) =>{
             text: error.response.data.error
             });
     })
+   
+}
+
+export const addEmployee = async (userInfo,formData,navigate) =>{
+
+    await axios.post(`${userApi}/add/employee`, formData, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userInfo.token}`
+        }
+    }).then(response =>{
+        if(response.status === 200)
+            navigate('/admin/manager/employee');
+    }).catch(error =>{
+        const errorMessage = error.response.data.error;
+        if(error.response.status!==401){
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                html: errorMessage.map(err => `${err.split(':')[1]}<br>`).join('')
+            });
+        }
+        
+    });
    
 }

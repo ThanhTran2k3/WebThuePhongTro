@@ -71,9 +71,12 @@ const EditUser = () => {
                 formData.append('fullName', event.target.fullName.value);
                 formData.append('phoneNumber', event.target.phoneNumber.value);
                 formData.append('birthDate', event.target.birthDate.value);
-                formData.append('city', event.target.city.selectedOptions[0].text);
-                formData.append('district', event.target.district.selectedOptions[0].text);
-                formData.append('wards', event.target.wards.selectedOptions[0].text);
+                if(event.target.city.selectedOptions[0].text!=="Chọn tỉnh thành")
+                    formData.append('city', event.target.city.selectedOptions[0].text);
+                if(event.target.district.selectedOptions[0].text!=="Chọn quận huyện")
+                    formData.append('district', event.target.district.selectedOptions[0].text);
+                if(event.target.wards.selectedOptions[0].value!=="Chọn phường xã")
+                    formData.append('wards', event.target.wards.selectedOptions[0].text);
                 formData.append('address', event.target.address.value);
                 formData.append('email', event.target.email.value);
 
@@ -83,8 +86,7 @@ const EditUser = () => {
                     formData.append('avatar', fileInput);
                 }
 
-                editUser(formData,userInfo,updateUser)
-              Swal.fire("Saved!", "", "success");
+              editUser(formData,userInfo,updateUser)
             } else if (result.isDenied) {
               Swal.fire("Changes are not saved", "", "info");
             }

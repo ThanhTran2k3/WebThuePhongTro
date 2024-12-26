@@ -26,6 +26,8 @@ public class PostResponse {
     private String district;
     private String wards;
     private String address;
+    private double latitude;
+    private double longitude;
     private String description;
     private BigDecimal rentPrice;
     private BigDecimal deposit;
@@ -33,6 +35,7 @@ public class PostResponse {
     private LocalDateTime expirationDate;
     private Set<PostImages> postImages;
     private PostCategory postCategory;
+    private RoomType roomType;
     private boolean status;
     private Boolean approvalStatus;
     private String userName;

@@ -4,13 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "Services")
 public class Services {
 
@@ -19,11 +25,9 @@ public class Services {
     private int serviceId;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Tên dịch vụ không được để trống")
     private String serviceName;
 
     @Column(nullable = false)
-    @Min(value = 1,message = "Giá trị phải lớn hơn 0")
     private BigDecimal price;
 
     @Column(nullable = false)

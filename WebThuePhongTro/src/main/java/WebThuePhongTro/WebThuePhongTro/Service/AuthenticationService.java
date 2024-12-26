@@ -1,6 +1,7 @@
 package WebThuePhongTro.WebThuePhongTro.Service;
 
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.AuthenticationLoginRequest;
+import WebThuePhongTro.WebThuePhongTro.DTO.Request.PasswordRequest;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.AuthenticationResponse;
 import WebThuePhongTro.WebThuePhongTro.Exception.AppException;
 import WebThuePhongTro.WebThuePhongTro.Exception.ErrorCode;
@@ -35,6 +36,8 @@ public class AuthenticationService {
 
     private final UserPostService userPostService;
 
+    private final MessageService messageService;
+
     @Value("${jwt.secretKey}")
     private String secretKey;
 
@@ -49,14 +52,51 @@ public class AuthenticationService {
             user = userRepository.findByUserName(authenticationRequest.getUserName())
                     .orElseThrow(()->new AppException(ErrorCode.ERROR_USER_LOGIN));
         }
-
-
         boolean auth = passwordEncoder.matches(authenticationRequest.getPassword(),user.getPassword());
 
         if(!auth)
             throw new AppException(ErrorCode.ERROR_USER_LOGIN);
         if(!user.isStatus())
             throw new AppException((ErrorCode.BLOCK_ACCOUNT));
+
+        String token = generateToken(user);
+        List<String> roles = user.getRoles().stream().map(Role::getRoleName).toList();
+        long unreadCount = messageService.unreadCount(user.getUsername());
+        return AuthenticationResponse.builder()
+                .token(token)
+                .userName(user.getUsername())
+                .avatar(user.getAvatar())
+                .roles(roles)
+                .unreadMessageCount(unreadCount)
+                .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                        .toList())
+                .build();
+    }
+
+    public AuthenticationResponse refreshToken(String tokenAuth) throws JOSEException, ParseException {
+
+        if(validateToken(tokenAuth)){
+            SignedJWT signedJWT = SignedJWT.parse(tokenAuth);
+            String userName = signedJWT.getJWTClaimsSet().getSubject();
+            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
+            String token = generateToken(user);
+            List<String> roles = user.getRoles().stream().map(Role::getRoleName).toList();
+            return AuthenticationResponse.builder()
+                    .token(token)
+                    .userName(user.getUsername())
+                    .avatar(user.getAvatar())
+                    .roles(roles)
+                    .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
+                            .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                            .toList())
+                    .build();
+        }
+        return null;
+    }
+
+
+    public AuthenticationResponse update(User user) throws JOSEException {
 
         String token = generateToken(user);
         List<String> roles = user.getRoles().stream().map(Role::getRoleName).toList();
@@ -71,40 +111,6 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse refreshToken(String tokenAuth) throws JOSEException, ParseException {
-
-        if(validateToken(tokenAuth)){
-            SignedJWT signedJWT = SignedJWT.parse(tokenAuth);
-            String userName = signedJWT.getJWTClaimsSet().getSubject();
-            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
-            String token = generateToken(user);
-            return AuthenticationResponse.builder()
-                    .token(token)
-                    .userName(user.getUsername())
-                    .avatar(user.getAvatar())
-                    .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
-                            .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
-                            .toList())
-                    .build();
-        }
-        return null;
-    }
-
-
-    public AuthenticationResponse update(User user) throws JOSEException {
-
-        String token = generateToken(user);
-
-        return AuthenticationResponse.builder()
-                .token(token)
-                .userName(user.getUsername())
-                .avatar(user.getAvatar())
-                .likePost(userPostService.getLikePostOfUser(user.getUserId()).stream()
-                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
-                        .toList())
-                .build();
-    }
-
 
     private String generateToken(User user) throws JOSEException {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
@@ -113,7 +119,7 @@ public class AuthenticationService {
                                     .subject(user.getUsername())
                                     .issuer("tro24h.com")
                                     .issueTime(new Date())
-                                    .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                                    .expirationTime(new Date(Instant.now().plus(2, ChronoUnit.HOURS).toEpochMilli()))
                                     .claim("scope",user.getRoles().stream().map(Role::getRoleName).collect(Collectors.joining()))
                                     .build();
 
@@ -145,5 +151,23 @@ public class AuthenticationService {
             return signedJWT.getJWTClaimsSet().getSubject();
         }
         throw new AppException(ErrorCode.USER_NOT_EXIST);
+    }
+
+    public void changePass(PasswordRequest passwordRequest,HttpServletRequest request) throws ParseException, JOSEException {
+        String userName = getUserName(request);
+        User user =  userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        boolean auth = passwordEncoder.matches(passwordRequest.getOldPassword(),user.getPassword());
+        if(!auth)
+            throw new AppException(ErrorCode.ERROR_CHANGE_PASSWORD);
+
+        user.setPassword(new BCryptPasswordEncoder().encode(passwordRequest.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public void changePassOTP(PasswordRequest passwordRequest,String email) throws ParseException, JOSEException {
+        User user =  userRepository.findByEmail(email).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXIST));
+        user.setPassword(new BCryptPasswordEncoder().encode(passwordRequest.getNewPassword()));
+        userRepository.save(user);
     }
 }

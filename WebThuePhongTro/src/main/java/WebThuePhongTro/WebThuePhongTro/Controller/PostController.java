@@ -5,8 +5,11 @@ import WebThuePhongTro.WebThuePhongTro.DTO.Response.ApiResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PageResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PostDetailResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.PostResponse;
+import WebThuePhongTro.WebThuePhongTro.Exception.ErrorCode;
 import WebThuePhongTro.WebThuePhongTro.Model.*;
 import WebThuePhongTro.WebThuePhongTro.Service.*;
+import WebThuePhongTro.WebThuePhongTro.Validator.CreateGroup;
+import WebThuePhongTro.WebThuePhongTro.Validator.EditGroup;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -44,24 +48,101 @@ public class PostController {
     private AuthenticationService authenticationService;
 
     @GetMapping("")
-    public ApiResponse<Object> getAllPost(@RequestParam(defaultValue = "1") int page) {
-
-        Page<PostResponse> postResponses = postService.getAllPost(page);
+    public ResponseEntity<?> getAllPost(@RequestParam(defaultValue = "1") int page,
+                                          @RequestParam(required = false) String city,
+                                          @RequestParam(required = false) String district,
+                                          @RequestParam(required = false) String ward,
+                                          @RequestParam(required = false) String roomType) {
+        Page<PostResponse> postResponses = postService.getAllPost(page,city,district,ward,roomType);
         PageResponse<?> pageResponse = PageResponse.builder()
                 .currentPage(page)
                 .totalPage(postResponses.getTotalPages())
                 .content(postResponses.getContent())
                 .build();
-        return ApiResponse.builder()
+        return ResponseEntity.ok(ApiResponse.builder()
                 .success(true)
                 .time(LocalDateTime.now())
                 .result(pageResponse)
+                .build());
+    }
+
+    @GetMapping("/region")
+    public ResponseEntity<?> getRegion(@RequestParam(required = false) String query,
+                                        @RequestParam(required = false) String city,
+                                        @RequestParam(required = false) String district,
+                                        @RequestParam(required = false) String ward,
+                                        @RequestParam(required = false) String roomType) {
+        List<PostResponse> postResponses = postService.getRegion(query,city,district,ward,roomType);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(postResponses)
+                .build());
+    }
+
+    @GetMapping("/location")
+    public ResponseEntity<?> getLocationPost(@RequestParam String address,
+                                       @RequestParam(required = false) String city,
+                                       @RequestParam(required = false) String district,
+                                       @RequestParam(required = false) String ward,
+                                       @RequestParam(required = false) String roomType) {
+        List<PostResponse> postResponses = postService.getNearPost(address,city,district,ward,roomType);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(postResponses)
+                .build());
+    }
+
+    @GetMapping("/new")
+    public ResponseEntity<?> getNewPost() {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(postService.getNewPost())
+                .build());
+    }
+
+    @GetMapping("/near")
+    public ResponseEntity<?> getNearPost(@RequestParam String address) {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(postService.getNearPost(address))
+                .build());
+    }
+
+    @GetMapping("/near/post")
+    public ResponseEntity<?> getNearPost(@RequestParam String address,
+                                         @RequestParam(defaultValue = "1") int page,
+                                         @RequestParam(required = false) String city,
+                                         @RequestParam(required = false) String district,
+                                         @RequestParam(required = false) String ward,
+                                         @RequestParam(required = false) String roomType) {
+        Page<PostResponse> postResponses = postService.getNearPost(address,page,city,district,ward,roomType);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(postResponses.getTotalPages())
+                .content(postResponses.getContent())
                 .build();
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(pageResponse)
+                .build());
+    }
+
+    @GetMapping("/city")
+    public ResponseEntity<?> getPostCity(@RequestParam String city) {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(postService.getPostLocation(city))
+                .build());
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> createPost(@ModelAttribute @Valid PostRequest postRequest, HttpServletRequest request) throws IOException, ParseException, JOSEException {
-
+    public ResponseEntity<?> createPost(@ModelAttribute @Validated(CreateGroup.class) PostRequest postRequest, HttpServletRequest request) throws IOException, ParseException, JOSEException {
         String userName = authenticationService.getUserName(request);
         if(!userName.isEmpty()){
             User user = userService.findByUserName(userName);
@@ -86,56 +167,61 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(false)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập bài viết")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
     }
 
-    @PutMapping("/delete/{postId}")
-    public ApiResponse<Void> deletePost(@PathVariable int postId,@RequestParam(defaultValue = "delete") String action) {
-        postService.deletePostById(postId,action);
-        return ApiResponse.<Void>builder().build();
+    @PutMapping("/status/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable int postId,@RequestParam(defaultValue = "delete") String action) {
+        postService.updateStatusPostById(postId,action);
+        return ResponseEntity.ok().body(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result("Thành công")
+                .build());
     }
 
 
 
     @PutMapping("/edit/{postId}")
-    public ResponseEntity<?> editPost(@PathVariable int postId,@ModelAttribute @Valid PostRequest postRequest, HttpServletRequest request) throws IOException, ParseException, JOSEException {
+    public ResponseEntity<?> editPost(@PathVariable int postId, @ModelAttribute @Validated(EditGroup.class) PostRequest postRequest, HttpServletRequest request) throws IOException, ParseException, JOSEException {
         String userName = authenticationService.getUserName(request);
-        if(!userName.isEmpty()){
-            if(postService.checkPostOfUser(userName,postId)) {
-                postService.editPost(postId,postRequest);
-            }
+        if(postService.checkPostOfUser(userName,postId)) {
+            postService.editPost(postId,postRequest);
+            return ResponseEntity.ok().body(ApiResponse.builder()
+                    .success(true)
+                    .time(LocalDateTime.now())
+                    .result("Thành công")
+                    .build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(false)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập bài viết")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
     }
 
     @PutMapping("/show/{postId}")
     public ResponseEntity<?> showPost(@PathVariable("postId") int postId, HttpServletRequest request) throws ParseException, JOSEException {
         String userName = authenticationService.getUserName(request);
-        if(!userName.isEmpty()){
-            Post post = postService.getPostId(postId);
-            if(postService.checkPostOfUser(userName,post.getPostId())){
-                boolean status = !post.isStatus();
-                post.setStatus(status);
-                postService.updatePost(post);
-                List<PostResponse> postResponses = postService.getAllPost().stream()
-                        .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
-                        .toList();
-                return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .time(LocalDateTime.now())
-                        .result(postResponses)
-                        .build());
-            }
+        Post post = postService.getPostId(postId);
+        if(postService.checkPostOfUser(userName,post.getPostId())){
+            boolean status = !post.isStatus();
+            post.setStatus(status);
+            postService.updatePost(post);
+            List<PostResponse> postResponses = postService.getAllPost().stream()
+                    .map(item -> PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
+                    .toList();
+            return ResponseEntity.ok(ApiResponse.builder()
+                    .success(true)
+                    .time(LocalDateTime.now())
+                    .result(postResponses)
+                    .build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(false)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập bài viết")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
     }
 
@@ -143,19 +229,11 @@ public class PostController {
     public ApiResponse<Object> detailPost(@PathVariable int postId) {
         Post post = postService.getPostId(postId);
         User user = userPostService.getUserCreatePost(post.getPostId());
-        List<PostResponse> posts = postService.getAllPost()
-                .stream().filter(s -> s.getPostId() != post.getPostId()
-                &&((s.getCity().equals(post.getCity())&&s.getDistrict().equals(post.getDistrict())&&s.getWards().equals(post.getWards()))
-                ||(s.getCity().equals(post.getCity())&&s.getDistrict().equals(post.getDistrict()))
-                ||(s.getCity().equals(post.getCity()))))
-                .limit(10)
-                .map(item->PostService.convertToDTO(item,userPostService.getUserCreatePost(item.getPostId()).getUsername()))
-                .toList();
-
+        List<PostResponse> postNear = postService.getNearPost(post);
         PostDetailResponse postDetailResponse = PostDetailResponse.builder()
                 .post(PostService.convertToDTO(post,user.getUsername()))
                 .userCreate(userService.convertToUserResponse(user))
-                .posts(posts)
+                .postNear(postNear)
                 .build();
 
         return ApiResponse.builder()
@@ -181,7 +259,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(true)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
 
     }
@@ -207,7 +285,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(false)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
     }
 
@@ -232,7 +310,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.builder()
                 .success(false)
                 .time(LocalDateTime.now())
-                .error("Bạn không có quyền truy cập")
+                .error(ErrorCode.USER_403.getMessage())
                 .build());
 
     }
@@ -266,9 +344,13 @@ public class PostController {
     }
 
     @GetMapping("/search/result")
-    public ResponseEntity<?> searchResult(@RequestParam String query, @RequestParam(defaultValue = "1")int page)
+    public ResponseEntity<?> searchResult(@RequestParam String query, @RequestParam(defaultValue = "1")int page,
+                                          @RequestParam(required = false) String city,
+                                          @RequestParam(required = false) String district,
+                                          @RequestParam(required = false) String ward,
+                                          @RequestParam(required = false) String roomType)
     {
-        Page<PostResponse> postResponses = postService.searchResult(query,page);
+        Page<PostResponse> postResponses = postService.searchResult(query,page,city,district,ward,roomType);
         PageResponse<?> pageResponse = PageResponse.builder()
                 .currentPage(page)
                 .totalPage(postResponses.getTotalPages())

@@ -11,7 +11,7 @@ const PostList = (props) => {
     const [listPost, setListPost] = useState([])
     const [totalPage, setTotalPage] = useState()
     const [page, setPage] = useState(1);
-    const { userInfo, postOfUser } = useUser();
+    const { userInfo } = useUser();
     const { userName } = useParams()
     const currentUserName = userName || userInfo.userName;
     const location = useLocation();
@@ -25,11 +25,11 @@ const PostList = (props) => {
         
         const fetchData = async () => {
             
-            let post;
-            if(userInfo.roles.includes('ROLE_USER'))
-                post = await getPostUser(currentUserName,navigate,newPage,props.postType)
-            else
+            let post
+            if(userInfo&&(userInfo.roles.includes('ROLE_EMPLOYEE')||userInfo.roles.includes('ROLE_ADMIN')))
                 post = await getPostManager(userInfo,navigate,newPage,props.postType)
+            else
+                post = await getPostUser(currentUserName,navigate,newPage,props.postType);
             setListPost(post.content)
             setTotalPage(post.totalPage)
             setPage(post.currentPage)
@@ -38,7 +38,7 @@ const PostList = (props) => {
         fetchData();
         
         window.scrollTo(0, 0); 
-    },[currentUserName,navigate,newPage,props.postType,postOfUser,userInfo,reload])
+    },[currentUserName,navigate,newPage,props.postType,userInfo,reload])
 
    
 

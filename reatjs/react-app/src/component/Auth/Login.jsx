@@ -79,7 +79,7 @@ const Login = () => {
     return (
         <div className="form-03-main w-40 mb-5 mt-5 bg-light border login">
             <div className="logo">
-                <img src='/user.png' alt=''/>
+                <img src='/user.png' alt='user'/>
             </div>
             <div className="form-floating mb-4">
                 <input className="form-control" type="text" onKeyDown={handleKeyDown} ref={usernameref} required placeholder="Tên đăng nhập hoặc email"/>
@@ -96,14 +96,8 @@ const Login = () => {
             </div>
 
             <div className="d-flex justify-content-between mb-4">
-                <div className="form-check">
-                    <input className="form-check-input" type="checkbox" value="" id=""/>
-                    <label className="form-check-label">
-                        Ghi nhớ?
-                    </label>
-                </div>
                 <div>
-                    <a href='sfsfs'>Quên mật khẩu?</a>
+                    <Link to={'/forgot-pass'}>Quên mật khẩu?</Link>
                 </div>
             </div>
 

@@ -11,7 +11,7 @@ const FormLocation = (props) => {
     const [disWards, setDisWards] = useState(true)
     const location = useLocation().pathname;
     const { postId } = useParams();
-    
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,10 +45,20 @@ const FormLocation = (props) => {
 
     const handleCityChange = (event)=>{
         const selectedCityId = event.target.value;
+        if(props.setSelectedCity){
+            const selectedCityName = event.target.value==='0'?null:event.target.options[event.target.selectedIndex].text;
+            props.setSelectedCity(selectedCityName)
+            if(!selectedCityName){
+                props.setSelectedCity(null)
+                props.setSelectedDistrict(null)
+                props.setSelectedWard(null)
+            }
+        }
+           
         setListDistrict([])
         setListWards([])
 
-        const shouldLoadDistricts = location==='/'?selectedCityId!=="allCity":true
+        const shouldLoadDistricts = location==='/new'?selectedCityId!=="0":true
 
         setDisDistrict(!shouldLoadDistricts)
         setDisWards(true)
@@ -65,16 +75,26 @@ const FormLocation = (props) => {
 
     const handleDistrictChange = (event) =>{
         const selectedDistrictId = event.target.value;
-        
+        if(props.setSelectedDistrict){
+            const selectedDistrictName = event.target.value==='0'?null:event.target.options[event.target.selectedIndex].text;
+            props.setSelectedDistrict(selectedDistrictName)
+        }
         setListWards([])
         
 
-        const shouldLoadWards = location==='/'?selectedDistrictId!=="allDistrict":true
+        const shouldLoadWards = location==='/new'?selectedDistrictId!=="0":true
         setDisWards(!shouldLoadWards)
         if(shouldLoadWards)
             loadWards(selectedDistrictId)
         
 
+    }
+
+    const handleWardChange = (event) =>{
+        if(props.setSelectedWard){
+            const selectedWardName = event.target.value==='0'?null:event.target.options[event.target.selectedIndex].text;
+            props.setSelectedWard(selectedWardName)
+        }
     }
 
     const loadWards = async (selectedDistrictId)=>{
@@ -85,25 +105,24 @@ const FormLocation = (props) => {
 
 
     return (
-        <div>
+        <div className={`${(location.startsWith('/user/manager/edit/profile') || location.startsWith('/user/manager/post/edit') || location.startsWith('/user/manager/post/create')) ? '' : 'd-flex'}`}>
             <div className="form-floating mb-4">
-                <select className="form-control he-58" name="city" onChange={handleCityChange} required>
+                <select className="form-control he-58 form-select"  name="city" onChange={handleCityChange} required>
                     <option disabled selected hidden>Chọn tỉnh thành</option>
-                    {location==='/' &&(
-                        <option key="allCity" value="allCity">Toàn quốc</option>
+                    {location==='/new' &&(
+                        <option value="0">Toàn quốc</option>
                     )}
                     {listCity.map(city=>(
                         <option value={city.id} selected={city.full_name===props.city} key={city.id}>{city.full_name}</option>
                     ))}
                 </select>
                 <label className="control-label">Tỉnh thành</label>
-                <span className="text-danger"></span>
             </div>
             <div className="form-floating mb-4">
-                <select className="form-control he-58" name="district"  onChange={handleDistrictChange} disabled={disDistrict} required>
-                    <option value="" selected hidden>Chọn quận huyện</option>
-                    {!disDistrict && location==='/' && (
-                        <option key="0" value="allDistrict">Tất cả</option>
+                <select className="form-control he-58 form-select" name="district"  onChange={handleDistrictChange} disabled={disDistrict} required>
+                    <option selected hidden>Chọn quận huyện</option>
+                    {!disDistrict && location==='/new' && (
+                        <option value="0">Tất cả</option>
                     )}
                     {listDistrict.map(district=>(
                         <option value={district.id} selected={district.full_name===props.district} key={district.id}>{district.full_name}</option>
@@ -112,10 +131,10 @@ const FormLocation = (props) => {
                 <label className="control-label">Quận huyện</label>
             </div>
             <div className="form-floating mb-4">
-                <select className="form-control he-58" name="wards" disabled={disWards} required>
-                    <option value="" selected hidden>Chọn phường xã</option>
-                    {!disWards &&location==='/' && (
-                        <option key="0" value="allWards">Tất cả</option>
+                <select className="form-control he-58 form-select" name="wards" onChange={handleWardChange} disabled={disWards} required>
+                    <option selected hidden>Chọn phường xã</option>
+                    {!disWards &&location==='/new' && (
+                        <option value="0">Tất cả</option>
                     )}
                     {listWards.map(ward=>(
                         

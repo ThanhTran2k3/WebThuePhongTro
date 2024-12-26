@@ -10,7 +10,6 @@ const PostCard = (props) => {
     const { userInfo, updateUser} = useUser();
     const navigate = useNavigate();
     const [isLike,setLike] = useState(false)
-
     useEffect(() => {
         if (userInfo) {
             setLike(userInfo.likePost.some(s => s.postId === props.postId));
@@ -38,28 +37,28 @@ const PostCard = (props) => {
 
     return (
         <div className="col-4 mb-5" key={props.postId}>
-            <div className="card gap-3 card-width">
+            <div className="card gap-3 card-width d-block">
                 <Link to={`/post/${props.postId}`}>
                     <img
                         src={`http://localhost:8080${props.filteredAnh[0].urlImage}`}
                         className={`w-100 img-fluid ${props.postCategory.postCategoryId !== 2 ? 'img-large' : 'img-small'}`}
                         alt="Hình ảnh bài đăng"
                     />
-                </Link>
-
-                {props.postCategory && props.postCategory.postCategoryId === 2 && (
-                    <div className="img-group">
-                        {props.map((anh, index) => (
-                            <Link to={`/post/${props.postId}`} key={index}>
+                    {props.postCategory && props.postCategory.postCategoryId === 2 && (
+                        <div className="img-servie2 d-flex">
+                            {props.filteredAnh.slice(1, 4).map((item) => (
                                 <img
-                                    src={anh.urlImage}
-                                    className="img-fluid img-thumbnail"
+                                    key={item.postImageId}
+                                    src={`http://localhost:8080${item.urlImage}`}
+                                    className="img-fluid"
                                     alt="Hình ảnh bài đăng"
                                 />
-                            </Link>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </Link>
+
+                
                 <div className="head-card">
                     <div className="priority">
                         {props.postCategory && props.postCategory.postCategoryId === 3 && (
@@ -88,10 +87,18 @@ const PostCard = (props) => {
                         {props.rentPrice.toLocaleString()} đ/ tháng
                     </p>
 
+                    <p className="lead mb-0">
+                        <i className="fa-solid fa-user"></i>
+                        <Link to={`/user/${props.userName}`} >
+                            <span className="priority-text">{props.userName} </span>
+                        </Link>
+                        
+                    </p>
                     <p className="lead mb-2">
                         <i className="fas fa-map-marker-alt"></i>
                         <span className="card-location">{props.city}</span>
                     </p>
+                    
                 </div>
             </div>
         </div>

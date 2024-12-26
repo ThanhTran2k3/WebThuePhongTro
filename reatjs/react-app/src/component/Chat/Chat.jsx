@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
 import { useUser } from '../../UserContext';
-import { getDetailChat } from '../../api/chatApi';
+import { getDetailChat, update } from '../../api/chatApi';
 import './ChatApp.css'
 import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 const Chat = (props) => {
+
     const { userInfo } = useUser();
     const [stompClient, setStompClient] = useState(null);
     const [messageContent, setMessageContent] = useState('');
@@ -14,6 +16,9 @@ const Chat = (props) => {
     const currentName = userInfo.userName;
     const messagesEndRef = useRef(null); 
     const [selectedMessage, setSelectedMessage] = useState(null);
+    let show = true
+    const navigate = useNavigate();
+
 
     useEffect(() => {
 
@@ -24,49 +29,46 @@ const Chat = (props) => {
 
     useEffect(() => {
         const fetchdata = async () => {
-           const messages = await getDetailChat(userInfo,props.userChat)
-        //    const message = messages.map((msg) => ({
-        //         senderName: msg.sender.username,
-        //         avatarSender: msg.sender.avatar,
-        //         receiverName: msg.receiver.username,
-        //         avatarReceiver: msg.receiver.avatar,
-        //         content: msg.content,
-        //         timestamp: msg.timestamp
-        //     }));
+           const messages = await getDetailChat(userInfo,props.userChat,navigate)
            setMessages(messages)
         };
 
         fetchdata();
-    }, [userInfo,props.userChat]);
+    }, [userInfo,props.userChat,navigate]);
 
+    
     useEffect(() => {
-        const client = new Client({
-            webSocketFactory: () => {
-                return new SockJS('http://localhost:8080/ws');
-            },
-            connectHeaders: {
-                Authorization: `Bearer ${userInfo.token}`,
-            },
-            onConnect: (frame) => {
-                client.subscribe(`/user/${currentName}/queue/messages`, (message) => {
-                    const receivedMessage = JSON.parse(message.body);
-                    setMessages(prevMessages => [...prevMessages, receivedMessage]);
-                });
-            },
-        });
-
-        client.activate();
-        setStompClient(client);
-
-        return () => {
-            if (client) {
-                client.deactivate();
-            }
-        };
-    }, [userInfo,currentName]);
+        if (userInfo && props.userChat) {
+            const client = new Client({
+                webSocketFactory: () => {
+                    return new SockJS('http://localhost:8080/ws');
+                },
+                onConnect: (frame) => {
+                    client.subscribe(
+                        `/topic/chat/${userInfo.userName}/${props.userChat}`,
+                        async (message) => {
+                            const receivedMessage = JSON.parse(message.body);
+                            const messagetamp = await update(userInfo, receivedMessage.messageId, navigate);
+                            setMessages((prevMessages) => [...prevMessages, messagetamp]);
+                        }
+                    );
+                },
+            });
+    
+            client.activate();
+            setStompClient(client);
+    
+            return () => {
+                if (client) {
+                    client.deactivate();
+                }
+            };
+        }
+    }, [userInfo,navigate,props.userChat]);
+    
 
     const sendMessage = () => {
-        if (stompClient && messageContent && props.userChat) {
+        if (stompClient && stompClient.active && messageContent && props.userChat) {
             const message = {
                 senderName: currentName,
                 receiverName: props.userChat,
@@ -84,10 +86,18 @@ const Chat = (props) => {
                 content: message.content,
                 timestamp: message.timestamp,
             };
-            setMessages(prevMessages => [...prevMessages, messagetamp]);
+            setMessages((prevMessages) => [...prevMessages, messagetamp]);
+            const user = props.listUser.filter((user) => user.userName === props.userChat);
+            const notUser = props.listUser.filter((user) => user.userName !== props.userChat);
+            props.setListUser([...user, ...notUser]);
             setMessageContent('');
+        } else {
+            console.error("STOMP client is not connected or message content is empty");
         }
     };
+    
+    
+    
 
     const handleMessageClick = (msg) => {
         if(msg===selectedMessage)
@@ -99,8 +109,14 @@ const Chat = (props) => {
     return (
         <div className="chat-container main">
             <div className="messages bg-light" ref={messagesEndRef}>
-                {messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.senderName === currentName ? 'sent' : 'received'}`}>
+                {messages.map((msg) => (
+                    <div key={msg.messageId} className={`message ${msg.senderName === currentName ? 'sent' : 'received'}`}>
+                    {!msg.status && msg.senderName !== currentName && show &&(
+                        <>
+                            <p className='text-center'>Tin nhắn chưa đọc</p>
+                            {show=false}
+                        </>
+                    )}
                     {msg.senderName === currentName ? (
                         <>
                             {selectedMessage === msg && (

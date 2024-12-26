@@ -5,7 +5,7 @@ const roomTypeApi = 'http://localhost:8080/api/roomType'
 export const getRoomType = async () =>{
     try{
         const response = await axios.get(`${roomTypeApi}`)
-        return response.data
+        return response.data.result
     }catch(error){
         console.error('Error get room type:', error);
         return []; 

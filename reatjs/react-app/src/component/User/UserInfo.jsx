@@ -4,6 +4,7 @@ import { getInfoUser } from '../../api/userApi';
 import { useUser } from '../../UserContext';
 import moment from 'moment';
 import PostList from '../Post/PostList';
+import Reviews from './Reviews'
 
 
 
@@ -45,7 +46,7 @@ const UserInfo = () => {
             <div className="col-md-12 d-flex ps-0">
                 <div className="col-md-3">
                     <div className="info h-100">
-                        <div className="avatar-user me-3">
+                        <div className="avatar-user">
                             <img src={`http://localhost:8080${user.avatar}`} alt="" className="avatar" />
                         </div>
                         <h4 className="p-5px text-center">{user.userName}</h4>
@@ -65,12 +66,14 @@ const UserInfo = () => {
                             <i className="fa-solid fa-calendar-days w-20"></i>
                             <span>Ngày tham gia: {moment(user.joinDate).format('DD-MM-YYYY')}</span>
                         </label>
-                        <button className="button-info report mt-3">
-                            <label>
-                                <i className="fa-solid fa-circle-info w-20"></i>
-                                <span>Báo cáo tài khoản</span>
-                            </label>
-                        </button>
+                        {/* {userInfo&&userInfo.userName!==user.userName &&(
+                            <button className="button-info report mt-3">
+                                <label>
+                                    <i className="fa-solid fa-circle-info w-20"></i>
+                                    <span>Báo cáo tài khoản</span>
+                                </label>
+                            </button>
+                        )} */}
                     </div>
                 </div>
 
@@ -79,7 +82,7 @@ const UserInfo = () => {
                         <button className={`btn ${activeButton==='post'?'red-underline':''}`} onClick={() => handleButtonClick(<PostList/>,'post')}>
                             Tin đăng
                         </button>
-                        <button className={`btn ${activeButton==='repost'?'red-underline':''}`} onClick={() => handleButtonClick('action2','repost')}>
+                        <button className={`btn ${activeButton==='reviews'?'red-underline':''}`} onClick={() => handleButtonClick(<Reviews user={user}/>,'reviews')}>
                             Đánh giá
                         </button>
                     </div>

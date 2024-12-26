@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { blockUser, getRoleUser } from '../../api/userApi';
+import { blockUser, getRoleEmployee, getRoleUser } from '../../api/userApi';
 import { useUser } from '../../UserContext';
 import moment from 'moment';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -22,13 +22,17 @@ const UserManager = () => {
 
     useEffect(()=>{
         const fetchdata = async ()=>{
-            const result = await getRoleUser(userInfo,activeButton,newPage)
+            let result
+            if(location.pathname==='/admin/manager/employee')
+                result = await getRoleEmployee(userInfo,activeButton,newPage)
+            else
+                result = await getRoleUser(userInfo,activeButton,newPage)
             setListUser(result.content)
             setTotalPage(result.totalPage);
             setPage(result.currentPage);
         }
         fetchdata()
-    },[userInfo,activeButton,newPage,reload])
+    },[userInfo,activeButton,newPage,reload,location.pathname])
     const handleButtonClick = async(buttonName) => {
         setActiveButton(buttonName)
         navigate('');

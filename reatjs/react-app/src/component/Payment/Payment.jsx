@@ -49,7 +49,7 @@ const Payment = () => {
                     </div>
 
                     <button onClick={handlePayment}  className="button-info payment">
-                        <label>Nạp</label>
+                        <label>Nạp tiền</label>
                     </button>
                 </div>
             </div>

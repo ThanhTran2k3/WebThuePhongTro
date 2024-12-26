@@ -170,4 +170,25 @@ pointer-events: none;
     padding: 3px 10px;
     font-size: 20px;
     text-align: center;
+    position: relative;
+    font-size: 24px;
+    cursor: pointer;
 }
+
+
+  
+  .unread-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  

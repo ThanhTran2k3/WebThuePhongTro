@@ -1,6 +1,7 @@
 package WebThuePhongTro.WebThuePhongTro.Controller;
 
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.AuthenticationRegisterRequest;
+import WebThuePhongTro.WebThuePhongTro.DTO.Request.PasswordRequest;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.ApiResponse;
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.AuthenticationLoginRequest;
 import WebThuePhongTro.WebThuePhongTro.Model.User;
@@ -12,11 +13,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,11 +47,33 @@ public class AuthenticationController {
                 .email(authenticationRegisterRequest.getEmail())
                 .password(authenticationRegisterRequest.getPassword())
                 .build();
-        userService.add(user);
+        userService.add(user,"ROLE_USER");
         return ResponseEntity.ok(ApiResponse.builder()
                 .success(true)
                 .time(LocalDateTime.now())
                 .result(userService.convertToUserResponse(user))
+                .build());
+    }
+
+    @PutMapping("/changePass")
+    public ResponseEntity<?> changePass(
+            @RequestBody @Valid PasswordRequest passwordRequest, HttpServletRequest request) throws ParseException, JOSEException {
+        authenticationService.changePass(passwordRequest,request);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result("Thành công")
+                .build());
+    }
+
+    @PostMapping("/changePassOTP")
+    public ResponseEntity<?> changePassOTP(
+            @RequestBody @Valid PasswordRequest passwordRequest) throws ParseException, JOSEException {
+        authenticationService.changePassOTP(passwordRequest,passwordRequest.getEmail());
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result("Thành công")
                 .build());
     }
 

@@ -123,9 +123,7 @@ const UserDashboard = () => {
                         </div>
                         <div className='user-details'>
                             <button className='userName-click' onClick={() => handleNavigation(<UserInfo />,'userInfo')}>
-                                <label>
-                                    {user.userName}
-                                </label>
+                                <label>{user.userName}</label>
                             </button>
                             <label className='price'>{formatCurrency(user.balance)}</label>
                         </div>
@@ -162,7 +160,7 @@ const UserDashboard = () => {
                     </button>
                     
 
-                    <button className={activeButton === 'changePass' ? 'button-click' : ''} onClick={() => handleNavigation(<ChangePass />,'changePass')}>
+                    <button className={activeButton === 'changePass' ? 'button-click' : ''} onClick={() => handleNavigation(<ChangePass/>,'changePass')}>
                         <label>
                             <i className="fa-solid fa-lock w-20"></i>
                             <span>Đổi mật khẩu</span>

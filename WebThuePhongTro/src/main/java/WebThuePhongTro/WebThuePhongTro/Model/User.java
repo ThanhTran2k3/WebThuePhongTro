@@ -1,5 +1,6 @@
 package WebThuePhongTro.WebThuePhongTro.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -36,14 +37,9 @@ public class User implements UserDetails {
     private String avatar;
 
     @Column(nullable = false, unique = true,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Tên người dùng không được bỏ trống")
-/*    @Unique(message = "Username đã được dùng")*/
-    @Size(min = 5, max = 50, message = "UserName từ 5 đến 50 ký tự")
     private String userName;
 
     @Column(columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Họ và tên không được để trống")
-    @Size(min =5 , message = "Họ và tên ít nhất 5 ký tự")
     private String fullName;
 
     @NotNull(message = "Ngày sinh không được bỏ trống")
@@ -52,32 +48,21 @@ public class User implements UserDetails {
     private LocalDate birthDate;
 
     @Column(unique = true,nullable = false,columnDefinition = "nvarchar(255)")
-    @Size(min = 10, max = 10, message = "Số điện thoại phải có 10 số")
-    @Pattern(regexp = "[0][0-9]*$", message = "Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")
-/*    @Unique(message = "Số điện thoại đã tồn tại")*/
     private String phoneNumber;
 
     @Column(unique = true,nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Email không được bỏ trống")
-    @Size(min = 1, max = 50, message = "Email không quá 50 ký tự")
-/*    @Unique(message = "Email đã tồn tại")*/
-    @Email(message = "Email không hợp lệ")
     private String email;
 
     @Column(columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Tỉnh thành không được để trống")
     private String city ;
 
     @Column(columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Quận huyện không được để trống")
     private String district;
 
     @Column(columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Phường xã không được để trống")
     private String wards;
 
     @Column(columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
@@ -101,9 +86,11 @@ public class User implements UserDetails {
     private Set<UserPost> userPosts;
 
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Message> sentMessages;
 
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Message> receivedMessages;
 
     @ManyToMany(fetch=FetchType.EAGER)
@@ -111,6 +98,13 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "roleId"))
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "reviewer")
+    private List<Reviews> reviewsGiven;
+
+
+    @OneToMany(mappedBy = "reviewedUser")
+    private List<Reviews> reviewsReceived;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -3,11 +3,21 @@ import Swal from "sweetalert2";
 
 const postApi = 'http://localhost:8080/api/post';
 
-export const getPost = async(page)=>{
+export const getNewPost = async()=>{
     try{
-        const response = await axios.get(`${postApi}`,{
+        const response = await axios.get(`${postApi}/new`)
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
+export const getNear = async(address)=>{
+    try{
+        const response = await axios.get(`${postApi}/near`,{
             params: {
-                page: page
+                address: address
             }
         })
         return response.data.result
@@ -16,6 +26,95 @@ export const getPost = async(page)=>{
         return []; 
     }
 }
+
+export const getNearPost = async(address,page,city,district,ward,roomType)=>{
+    try{
+        const response = await axios.get(`${postApi}/near/post`,{
+            params: {
+                address: address,
+                page: page,
+                city: city,
+                district: district,
+                ward: ward,
+                roomType: roomType
+            }
+        })
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
+export const getPostLocation = async(city)=>{
+    try{
+        const response = await axios.get(`${postApi}/city`,{
+            params: {
+                city: city
+            }
+        })
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
+
+export const getPost = async(page,city,district,ward,roomType)=>{
+    try{
+        const response = await axios.get(`${postApi}`,{
+            params: {
+                page: page,
+                city: city,
+                district: district,
+                ward: ward,
+                roomType: roomType
+            }
+        })
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
+export const getLocation = async(address,city,district,ward,roomType)=>{
+    try{
+        const response = await axios.get(`${postApi}/location`,{
+            params: {
+                address: address,
+                city: city,
+                district: district,
+                ward: ward,
+                roomType: roomType
+            }
+        })
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
+export const getRegion = async(query,city,district,ward,roomType)=>{
+    try{
+        const response = await axios.get(`${postApi}/region`,{
+            params: {
+                query: query,
+                city: city,
+                district: district,
+                ward: ward,
+                roomType: roomType
+            }
+        })
+        return response.data.result
+    }catch(error){
+        console.error('Error get post:', error);
+        return []; 
+    }
+}
+
 
 export const getPostById = async(userInfo,postId,navigate) =>{
     try{
@@ -70,7 +169,7 @@ export const addPost = async(formData,userInfo,navigate) =>{
         }
     }).then(response =>{
         if(response.status === 200)
-            navigate('/');
+            navigate('/user/manager/post');
     }).catch(error =>{
         Swal.fire({
             icon: "error",
@@ -92,6 +191,7 @@ export const editPost = async(formData,postId,userInfo,navigate) =>{
     }).then(response =>{
         if(response.status === 200)
             navigate('/');
+            return
     }).catch(error =>{
         const errorMessage = error.response.data.error;
         Swal.fire({
@@ -104,7 +204,7 @@ export const editPost = async(formData,postId,userInfo,navigate) =>{
 
 export const deletePost = async(userInfo,postId,navigate,action) =>{
 
-    await axios.put(`${postApi}/delete/${postId}`,{}, {
+    await axios.put(`${postApi}/status/${postId}`,{}, {
         params: {
             action: action,
         },
@@ -146,6 +246,7 @@ export const showPost = async(userInfo,postId,updatePostOfUser) =>{
     }).then(reponse =>{
         updatePostOfUser(reponse.data.result)
     }).catch(error =>{
+        console.log(error)
         Swal.fire({
             icon: "error",
             title: "Oops...",
@@ -155,7 +256,7 @@ export const showPost = async(userInfo,postId,updatePostOfUser) =>{
    
 }
 
-export const extendPost = async(userInfo,postId,month,service,updatePostOfUser) =>{
+export const extendPost = async(userInfo,postId,month,service,navigate) =>{
 
     const data = {
         month: month,
@@ -169,7 +270,7 @@ export const extendPost = async(userInfo,postId,month,service,updatePostOfUser) 
             Authorization: `Bearer ${userInfo.token}`
         }
     }).then(reponse =>{
-        updatePostOfUser(reponse.data.result)
+        navigate('/user/manager/post');
     }).catch(error =>{
         Swal.fire({
             icon: "error",
@@ -180,7 +281,7 @@ export const extendPost = async(userInfo,postId,month,service,updatePostOfUser) 
 
 }
 
-export const servicePost = async(userInfo,postId,day,service,updatePostOfUser) =>{
+export const servicePost = async(userInfo,postId,day,service,navigate) =>{
 
     const data = {
         day: day,
@@ -194,7 +295,7 @@ export const servicePost = async(userInfo,postId,day,service,updatePostOfUser) =
             Authorization: `Bearer ${userInfo.token}`
         }
     }).then(reponse =>{
-        updatePostOfUser(reponse.data.result)
+        navigate('/user/manager/post');
     }).catch(error =>{
         Swal.fire({
             icon: "error",
@@ -219,12 +320,16 @@ export const postSuggestions = async (query) => {
     }
 };
 
-export const postSearch = async (query,page) => {
+export const postSearch = async (query,page,city,district,ward,roomType) => {
     try {
         const response = await axios.get(`${postApi}/search/result`,{
             params: {
                 query: query,
-                page: page
+                page: page,
+                city: city,
+                district: district,
+                ward: ward,
+                roomType: roomType
             },
         });
         return response.data.result;

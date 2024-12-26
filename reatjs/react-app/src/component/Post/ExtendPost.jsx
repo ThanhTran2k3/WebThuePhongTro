@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 const ExtendPost = (props) => {
     const [post ,setPost] = useState()
-    const { userInfo,updatePostOfUser  } = useUser();
+    const { userInfo  } = useUser();
     const { postId } = useParams()
     const [service , setService] = useState({})
     const [totalAmount, setTotalAmount] = useState('')
@@ -72,9 +72,7 @@ const ExtendPost = (props) => {
         }
         else{
             try {
-                await extendPost(userInfo,post.postId,value,service.serviceId,updatePostOfUser)
-                
-                navigate('/user/manager');
+                await extendPost(userInfo,post.postId,value,service.serviceId,navigate)
             } catch (error) {
 
                 console.error("Error:", error);

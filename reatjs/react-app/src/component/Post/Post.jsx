@@ -37,6 +37,7 @@ const Post = (props) => {
 
     const handleShow = async() =>{
         await showPost(userInfo,props.postId,updatePostOfUser)
+        props.setReload(!props.reload)
         
     }
 
@@ -76,8 +77,9 @@ const Post = (props) => {
                             <div className='img-servie'>
                                 {props.filteredAnh.slice(1, 4).map((item) => (
                                     <img
+                                        key={item.postImageId}
                                         src={`http://localhost:8080${item.urlImage}`}
-                                        className='w-100 img-fluid'
+                                        className='img-fluid'
                                         alt="Hình ảnh bài đăng"
                                     />
                                 ))}
@@ -102,7 +104,7 @@ const Post = (props) => {
                     {props.district + ', ' + props.city}
                 </p>
 
-                <div className='post-detail mt-auto d-flex'>
+                <div className='post-detail d-flex'>
                     <p className="lead mb-0">
                         <i className="fa-solid fa-user priority-text"></i>
                         <Link to={`/user/${props.userName}`} >
@@ -156,7 +158,7 @@ const Post = (props) => {
                         
                     )}
                     {location !== '/user/manager/post' && !location.includes('/user/manager/post/extend') ? (
-                        (!userInfo || userInfo.roles.includes('ROLE_USER')) && (
+                        (!userInfo || (userInfo&&userInfo.roles.includes('ROLE_USER'))) && (
                             <div className="favorite-button ms-auto">
                                 <button className="heart-button" onClick={handleLikePost}>
                                 <i className={`${isLike ? 'fas' : 'far'} fa-heart`}></i>

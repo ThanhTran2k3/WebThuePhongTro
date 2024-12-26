@@ -16,4 +16,6 @@ public class AuthenticationResponse {
     private String userName;
     private List<String> roles;
     private List<PostResponse> likePost;
+    private long unreadMessageCount;
+
 }

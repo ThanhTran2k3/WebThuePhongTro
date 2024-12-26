@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
+import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class InvoiceService {
 
     public Page<InvoiceResponse> getInvoiceOfUser(String userName, int page,String service){
         Pageable pageable = PageRequest.of(page-1, 5, Sort.by(Sort.Direction.DESC, "issueDate"));
-        if(service== null)
+        if(service== null || service.isEmpty())
             return invoiceRepository.findByUser_UserName(userName,pageable)
                     .map(InvoiceService::convertToDTO);
         else if (service.equals("Nạp tiền")) {
@@ -78,6 +79,37 @@ public class InvoiceService {
         user.setBalance(user.getBalance().add(BigDecimal.valueOf(Long.parseLong(amount))));
         userService.updateUser(user);
     }
+
+    public Map<String, Integer> getStatistic(int year) {
+        Map<String, Integer> years = new HashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            years.put("Tháng "+i, 0);
+        }
+        years.putAll(invoiceRepository.findAll().stream()
+                .filter(invoice -> invoice.getIssueDate().getYear() == year)
+                .collect(Collectors.groupingBy(
+                        invoice -> "Tháng "+ invoice.getIssueDate().getMonthValue(),
+                        Collectors.summingInt(invoice -> invoice.getTotalAmount().intValue())
+                )));
+        return years;
+    }
+
+    public Map<String, Integer> getStatisticByTime(int month,int year) {
+        Map<String, Integer> service = webService.getAllService().stream()
+                .collect(Collectors.toMap(
+                        Services::getServiceName,
+                        invoice -> 0
+                ));
+        service.putAll(invoiceRepository.findAll().stream()
+                .filter(invoice -> invoice.getIssueDate().getYear() == year && invoice.getIssueDate().getMonthValue()==month )
+                .collect(Collectors.groupingBy(
+                        invoice -> invoice.getService().getServiceName(),
+                        Collectors.summingInt(invoice -> invoice.getTotalAmount().intValue())
+                )));
+
+        return service;
+    }
+
 
     public static InvoiceResponse convertToDTO(Invoice invoice) {
 

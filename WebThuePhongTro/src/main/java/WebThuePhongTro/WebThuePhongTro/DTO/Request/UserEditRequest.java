@@ -38,13 +38,13 @@ public class UserEditRequest {
     @Unique(message = "Email đã tồn tại")
     private String email;
 
-    @NotBlank(message = "Tỉnh thành không được để trống")
+    @NotNull(message = "Tỉnh thành không được để trống")
     private String city ;
 
-    @NotBlank(message = "Quận huyện không được để trống")
+    @NotNull(message = "Quận huyện không được để trống")
     private String district;
 
-    @NotBlank(message = "Phường xã không được để trống")
+    @NotNull(message = "Phường xã không được để trống")
     private String wards;
 
     @NotBlank(message = "Địa chỉ không được để trống")

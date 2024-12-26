@@ -18,4 +18,6 @@ public class ServicesResponse {
     private String serviceName;
 
     private BigDecimal price;
+
+    private boolean status;
 }

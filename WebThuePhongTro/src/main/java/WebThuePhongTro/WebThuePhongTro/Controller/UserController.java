@@ -1,14 +1,13 @@
 package WebThuePhongTro.WebThuePhongTro.Controller;
 
 
+import WebThuePhongTro.WebThuePhongTro.DTO.Request.AuthenticationRegisterRequest;
 import WebThuePhongTro.WebThuePhongTro.DTO.Request.UserEditRequest;
 import WebThuePhongTro.WebThuePhongTro.DTO.Response.*;
 import WebThuePhongTro.WebThuePhongTro.Model.Post;
+import WebThuePhongTro.WebThuePhongTro.Model.Role;
 import WebThuePhongTro.WebThuePhongTro.Model.User;
-import WebThuePhongTro.WebThuePhongTro.Service.AuthenticationService;
-import WebThuePhongTro.WebThuePhongTro.Service.PostService;
-import WebThuePhongTro.WebThuePhongTro.Service.UserPostService;
-import WebThuePhongTro.WebThuePhongTro.Service.UserService;
+import WebThuePhongTro.WebThuePhongTro.Service.*;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/user")
@@ -37,6 +37,7 @@ public class UserController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
 
 
     @GetMapping("/detail")
@@ -123,9 +124,42 @@ public class UserController {
                 .build());
     }
 
+    @GetMapping("/role/employee")
+    public ResponseEntity<?> roleEmployee(@RequestParam String type,@RequestParam(defaultValue = "1")int page){
+        Page<UserResponse> userResponses = userService.getRoleEmployee(type,page);
+        PageResponse<?> pageResponse = PageResponse.builder()
+                .currentPage(page)
+                .totalPage(userResponses.getTotalPages())
+                .content(userResponses.getContent())
+                .build();
+        return  ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(pageResponse)
+                .build());
+    }
+
     @PutMapping("/block/{userName}")
     public void postUser(@PathVariable("userName") String userName){
         userService.blockUser(userName);
+    }
+
+    @PostMapping("/add/employee")
+    public ResponseEntity<?> createEmployee(
+            @RequestBody @Valid AuthenticationRegisterRequest authenticationRegisterRequest) throws IOException {
+        User user = User.builder()
+                .avatar("/images/AnhMacDinh.jpg")
+                .userName(authenticationRegisterRequest.getUserName())
+                .phoneNumber(authenticationRegisterRequest.getPhoneNumber())
+                .email(authenticationRegisterRequest.getEmail())
+                .password(authenticationRegisterRequest.getPassword())
+                .build();
+        userService.add(user,"ROLE_EMPLOYEE");
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .time(LocalDateTime.now())
+                .result(userService.convertToUserResponse(user))
+                .build());
     }
 
 }

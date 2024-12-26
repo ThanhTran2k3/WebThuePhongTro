@@ -15,7 +15,7 @@ const EmployeeDashboard = () => {
     const [currentContent, setCurrentContent] = useState(<UserManager />);
     const navigate = useNavigate();
     const [user,setUser] = useState({})
-    const [activeButton, setActiveButton] = useState('userManage');
+    const [activeButton, setActiveButton] = useState('userManager');
     const { userInfo } = useUser();
     const location = useLocation(); 
 
@@ -45,7 +45,7 @@ const EmployeeDashboard = () => {
 
         if (location.pathname === '/employee/manager/user') {
             setCurrentContent(<UserManager />);
-            setActiveButton('userManage')
+            setActiveButton('userManager')
         } else if (location.pathname === '/employee/manager/post') {
             setCurrentContent(<ApprovePost />);
             setActiveButton('postManager')
@@ -71,7 +71,7 @@ const EmployeeDashboard = () => {
          setCurrentContent(content);
          setActiveButton(buttonName);
         
-        if(buttonName==='userManage')
+        if(buttonName==='userManager')
             navigate('/employee/manager/user')
         else if(buttonName==='postManager')
             navigate('/employee/manager/post')
@@ -106,9 +106,7 @@ const EmployeeDashboard = () => {
                         </div>
                         <div className='user-details'>
                             {/* <button className='userName-click' onClick={() => handleNavigation(<UserInfo />,'userInfo')}> */}
-                                <label>
-                                    {user.userName}
-                                </label>
+                                <label className='userName-click'>{user.userName}</label>
                             {/* </button> */}
                             <label className='price'>{formatCurrency(user.balance)}</label>
                         </div>
@@ -116,7 +114,7 @@ const EmployeeDashboard = () => {
                 </div>
                 <div className='dashboard'>
 
-                    <button className={activeButton === 'userManage' ? 'button-click' : ''} onClick={() => handleNavigation(<UserManager/>,'userManage')}>
+                    <button className={activeButton === 'userManager' ? 'button-click' : ''} onClick={() => handleNavigation(<UserManager/>,'userManager')}>
                         <label>
                             <i className="fa-solid fa-user w-20"></i>
                             <span>Quản lý người dùng</span>

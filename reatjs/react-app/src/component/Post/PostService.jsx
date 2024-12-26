@@ -3,12 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getPostById, servicePost } from "../../api/postApi";
 import { useUser } from '../../UserContext';
 import Post from './Post';
-import { getListService } from '../../api/serviceApi';
+import { getServicess } from '../../api/serviceApi';
 import Swal from 'sweetalert2';
 
 const PostService = (props) => {
     const [post ,setPost] = useState()
-    const { userInfo, updatePostOfUser  } = useUser();
+    const { userInfo } = useUser();
     const { postId } = useParams()
     const [listService , setListService] = useState([])
     const [totalAmount, setTotalAmount] = useState()
@@ -20,7 +20,7 @@ const PostService = (props) => {
         if(postId){
             const fetchData = async () => {
                 const post = await getPostById(userInfo,postId,navigate);
-                const service = await getListService()
+                const service = await getServicess()
                 setListService(service)
                 setTotalAmount(service.price)
                 setPost(post)
@@ -73,9 +73,8 @@ const PostService = (props) => {
         }
         else{
             try {
-                await servicePost(userInfo, post.postId, value, serviceSel.serviceId,updatePostOfUser);
+                await servicePost(userInfo, post.postId, value, serviceSel.serviceId,navigate);
                 
-                navigate('/user/manager');
             } catch (error) {
 
                 console.error("Error:", error);

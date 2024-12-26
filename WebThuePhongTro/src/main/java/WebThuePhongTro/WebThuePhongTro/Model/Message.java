@@ -31,4 +31,7 @@ public class Message {
 
     private LocalDateTime timestamp;
 
+    @Column(nullable = false)
+    private boolean status;
+
 }

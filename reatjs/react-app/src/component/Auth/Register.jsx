@@ -108,7 +108,7 @@ const Register = () => {
 
             <div className="mb-4">
                 <div className="_btn_04">
-                    <button onClick={handleLogin} className="btn createButton">Đăng ký</button>
+                    <button onClick={handleLogin} className="btn createButton" disabled={error}>Đăng ký</button>
                 </div>
             </div>
 

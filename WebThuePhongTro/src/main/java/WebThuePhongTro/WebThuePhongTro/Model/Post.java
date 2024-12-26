@@ -1,5 +1,7 @@
 package WebThuePhongTro.WebThuePhongTro.Model;
 
+import WebThuePhongTro.WebThuePhongTro.Validator.CreateGroup;
+import WebThuePhongTro.WebThuePhongTro.Validator.EditGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -26,40 +28,36 @@ public class Post {
     private int postId;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
 
     @Column(nullable = false)
-    @Min(value = 1,message = "Giá trị phải lớn hơn 1")
     private double area;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Tỉnh thành không được để trống")
     private String city ;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Quận huyện không được để trống")
     private String district;
 
     @Column(nullable = false,columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Phường xã không được để trống")
     private String wards;
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
 
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
+
     @Column(nullable = false,columnDefinition = "nvarchar(MAX)")
-    @NotBlank(message = "Mô tả không được để trống")
-    @Size(min = 5,message = "Mô tả phải nhiều hơn 5 ký tự")
     private String description;
 
     @Column(nullable = false)
-    @Min(value = 1,message = "Giá thuê phải lớn hơn 0đ")
     private BigDecimal rentPrice;
 
     @Column(nullable = false)
-    @Min(value = 0,message = "Tiền cọc không được âm")
     private BigDecimal deposit;
 
     @Column(nullable = false)

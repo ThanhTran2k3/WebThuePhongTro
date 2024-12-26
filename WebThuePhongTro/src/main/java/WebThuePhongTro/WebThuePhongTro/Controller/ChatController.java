@@ -24,7 +24,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/messages")
 public class ChatController {
 
@@ -50,18 +50,19 @@ public class ChatController {
                 .receiver(receiver)
                 .content(messageRequest.getContent())
                 .timestamp(messageRequest.getTimestamp())
+                .status(false)
                 .build();
         messageService.saveMessage(message);
 
-        MessageResponse messageResponse = MessageResponse.builder()
-                .senderName(sender.getUsername())
-                .avatarSender(sender.getAvatar())
-                .receiverName(receiver.getUsername())
-                .avatarReceiver(receiver.getAvatar())
-                .content(messageRequest.getContent())
-                .timestamp(message.getTimestamp())
-                .build();
-        messagingTemplate.convertAndSendToUser(messageRequest.getReceiverName(), "/queue/messages", messageResponse);
+        MessageResponse messageResponse = messageService.convertToMessageResponse(message);
+        messagingTemplate.convertAndSend(
+                String.format("/topic/chat/%s/%s", receiver.getUsername(),sender.getUsername()),
+                messageResponse
+        );
+        messagingTemplate.convertAndSend(
+                String.format("/topic/chat/%s", receiver.getUsername()),
+                messageService.listUserChat(receiver.getUsername())
+        );
     }
 
     @GetMapping("")
@@ -83,7 +84,28 @@ public class ChatController {
                 ApiResponse.builder()
                         .success(true)
                         .time(LocalDateTime.now())
-                        .result(messageService.detailChat(userName,userChat))
+                        .result(messageService.detailMessage(userName,userChat))
+                        .build()
+        );
+    }
+
+    @PutMapping("/update")
+    public void update(HttpServletRequest request, @RequestParam String receiverName) throws ParseException, JOSEException {
+        String userName = authenticationService.getUserName(request);
+        messageService.updateListMessages(userName,receiverName);
+        messagingTemplate.convertAndSend(
+                String.format("/topic/chat/%s", userName),
+                messageService.listUserChat(userName));
+    }
+
+    @PutMapping("/update/{messageId}")
+    public ResponseEntity<?> update(HttpServletRequest request,@PathVariable int messageId) throws ParseException, JOSEException {
+        String userName = authenticationService.getUserName(request);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .success(true)
+                        .time(LocalDateTime.now())
+                        .result(messageService.updateMessage(messageId))
                         .build()
         );
     }

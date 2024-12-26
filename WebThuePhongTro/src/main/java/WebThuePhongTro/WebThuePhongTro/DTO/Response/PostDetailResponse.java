@@ -15,5 +15,5 @@ import java.util.List;
 public class PostDetailResponse {
     private PostResponse post;
     private UserResponse userCreate;
-    private List<PostResponse> posts;
+    private List<PostResponse> postNear;
 }

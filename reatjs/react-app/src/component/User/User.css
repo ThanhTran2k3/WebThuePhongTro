@@ -1,8 +1,7 @@
 .user-dashboard{
-    width: 200px;
+    width: 250px;
     padding: 10px;
     background-color: #f4f6fd;
-    position: fixed;
     top: 10%;
     left: 0;
 }
@@ -91,4 +90,84 @@
 .red-underline {
     text-decoration: none; 
     border-bottom: 2px solid red; 
+}
+
+
+.year-select {
+    padding: 10px;
+    font-size: 16px;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    outline: none;
+    cursor: pointer;
+ 
+    transition: border-color 0.3s ease;
+  }
+  
+  .year-select:hover {
+    border-color: #007bff;
+  }
+  
+  .year-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+
+  .year-select::-ms-expand {
+    display: none;
+  }
+  
+.anh-service{
+    height: 200px;
+}
+
+.comment-item {
+    display: flex;
+    align-items: flex-start; 
+    background-color: #f8f9fa; 
+    border-radius: 10px; 
+    padding: 10px; 
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+.avatar {
+    width: 40px; 
+    height: 40px;
+    border-radius: 50%; 
+    object-fit: cover; 
+}
+
+.comment-item p {
+    flex-grow: 1; 
+    font-size: 14px; 
+    margin: 10px 0px 0px 0px ;
+    line-height: 1.4;
+}
+
+.btn-del{
+    font-size: 12px;
+    color: #6c757d; 
+    margin-top: 5px;
+    display: block; 
+}
+
+.btn-del{
+    font-size: 12px; /* Kích thước chữ nhỏ */
+    color: #6c757d; /* Màu chữ xám */
+}
+
+.btn-del{
+    color: #dc3545; /* Màu đỏ cho nút "Gỡ" */
+    font-weight: bold; /* In đậm */
+    cursor: pointer; /* Hiệu ứng con trỏ */
+    transition: color 0.2s; /* Hiệu ứng chuyển màu mượt */
+}
+
+.btn-del:hover {
+    color: #ff0000; /* Đổi sang màu đỏ tươi khi hover */
+    text-decoration: underline; /* Gạch chân khi hover */
 }

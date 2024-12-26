@@ -13,10 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class MessageResponse {
 
+    private int messageId;
     private String senderName;
     private String avatarSender;
     private String receiverName;
     private String avatarReceiver;
     private String content;
     private LocalDateTime timestamp;
+    private boolean status;
 }
